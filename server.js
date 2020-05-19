@@ -3,10 +3,12 @@ var express = require("express");
 var http = require("http");
 var path = require("path");
 var socketIO = require("socket.io");
+var pokersolver = require("pokersolver");
 
 var app = express();
 var server = http.createServer(app);
 var io = socketIO(server);
+var Hand = pokersolver.Hand;
 
 app.set("port", 8080);
 app.use(express.static(path.join(__dirname, "build")));

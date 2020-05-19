@@ -1,6 +1,7 @@
 import React from "react";
 import axios from "axios";
 
+import Hand from "./Hand";
 import Card from "./Card";
 
 export default class Game extends React.Component {
@@ -17,6 +18,7 @@ export default class Game extends React.Component {
       .get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
       .then((res) => {
         this.setState({ deckID: res.data.deck_id });
+        this.getCards();
       });
   }
 
@@ -26,19 +28,29 @@ export default class Game extends React.Component {
         `https://deckofcardsapi.com/api/deck/${this.state.deckID}/draw/?count=13`
       )
       .then((res) => {
-        this.setState({ cards: res.data.cards });
+        const cards = res.data.cards.map((card) => (
+          <Card key={card.code} data={card} />
+        ));
+        this.setState({ cards });
       });
   }
 
+  onClick = (e) => {
+    console.log("onSubmit");
+  };
+
   render() {
     return (
-      <div>
-        <button onClick={this.getCards.bind(this)}>Draw a card!</button>
-        <div>
-          {this.state.cards.map((card, i) => (
-            <Card key={card.code} data={card} />
-          ))}
+      <div className="flexbox">
+        <div className="flexbox">
+          <Hand />
+          <Hand />
+          <Hand />
+          <button onClick={this.onClick} style={{ width: 70 }}>
+            Submit
+          </button>
         </div>
+        <div className="row">{this.state.cards}</div>
       </div>
     );
   }
