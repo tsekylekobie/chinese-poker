@@ -31,11 +31,11 @@ io.on("connection", function (socket) {
   });
 
   socket.on("submit", (h1, h2, h3) => {
-    hand1s.push({ 'p1': h1 });
-    hand2s.push({ 'p1': h2 });
-    hand3s.push({ 'p1': h3 });
-    io.emit('status', 'Waiting for other players...');
-  })
+    hand1s.push({ p1: h1 });
+    hand2s.push({ p1: h2 });
+    hand3s.push({ p1: h3 });
+    io.emit("status", "Waiting for other players...");
+  });
 });
 
 const hand1s = {};

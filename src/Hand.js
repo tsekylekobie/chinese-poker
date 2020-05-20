@@ -4,11 +4,15 @@ import Card from "./Card";
 
 export default class Hand extends React.Component {
   onDrop = (e) => {
-    const { cards, onChange } = this.props;
-    const state = JSON.parse(e.dataTransfer.getData("cardState"));
-    cards.push(state);
-    onChange(cards);
     e.preventDefault();
+    const { onChange, removeCard, name } = this.props;
+    const cardState = JSON.parse(e.dataTransfer.getData("text"));
+    // remove card from all hands
+    const newGameState = removeCard(cardState.code);
+    // add it to current hand
+    newGameState[[name]].push(cardState);
+    // update parent state using handler
+    onChange(newGameState);
   };
 
   onDragOver = (e) => {
@@ -16,14 +20,12 @@ export default class Hand extends React.Component {
   };
 
   render() {
-    const { cards, removeCard } = this.props;
+    const { children } = this.props;
     return (
-      <div
-        className="row"
-        onDrop={this.onDrop}
-        onDragOver={this.onDragOver}
-      >
-        {cards.map((card) => <Card key={card.code} data={card} removeCard={() => removeCard(card.code)} />)}
+      <div className="row" onDrop={this.onDrop} onDragOver={this.onDragOver}>
+        {children.map((card) => (
+          <Card key={card.code} data={card} />
+        ))}
       </div>
     );
   }

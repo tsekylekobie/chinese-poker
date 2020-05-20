@@ -12,18 +12,11 @@ export default class Game extends React.Component {
   }
 
   onDragStart = (e) => {
-    e.dataTransfer.setData("cardState", JSON.stringify(this.state));
+    e.dataTransfer.setData("text", JSON.stringify(this.state));
   };
 
   onDragOver = (e) => {
     e.stopPropagation();
-  };
-
-  onDragEnd = (e) => {
-    // Card disappears only if successful drag and drop
-    if (e.dataTransfer.dropEffect === "move") {
-      this.props.removeCard();
-    }
   };
 
   render() {
@@ -33,7 +26,6 @@ export default class Game extends React.Component {
         draggable={true}
         onDragStart={this.onDragStart}
         onDragOver={this.onDragOver}
-        onDragEnd={this.onDragEnd}
       >
         <img alt={text} src={this.state.image} width="75" />
       </div>
