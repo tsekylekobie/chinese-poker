@@ -3,18 +3,12 @@ import React from "react";
 import Card from "./Card";
 
 export default class Hand extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      cards: [],
-    };
-  }
-
   onDrop = (e) => {
-    e.preventDefault();
+    const { cards, onChange } = this.props;
     const state = JSON.parse(e.dataTransfer.getData("cardState"));
-    const newCard = <Card key={state.code} data={state} />;
-    this.setState({ cards: [...this.state.cards, newCard] });
+    cards.push(state);
+    onChange(cards);
+    e.preventDefault();
   };
 
   onDragOver = (e) => {
@@ -22,6 +16,7 @@ export default class Hand extends React.Component {
   };
 
   render() {
+    const { cards, removeCard } = this.props;
     return (
       <div
         className="row"
@@ -29,7 +24,7 @@ export default class Hand extends React.Component {
         onDrop={this.onDrop}
         onDragOver={this.onDragOver}
       >
-        {this.state.cards}
+        {cards.map((card) => <Card key={card.code} data={card} removeCard={() => removeCard(card.code)} />)}
       </div>
     );
   }
