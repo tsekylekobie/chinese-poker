@@ -20,7 +20,6 @@ export default class Hand extends React.Component {
     return (
       <div
         className="row"
-        style={{ borderStyle: "solid", height: 100, backgroundColor: "red" }}
         onDrop={this.onDrop}
         onDragOver={this.onDragOver}
       >
