@@ -1,9 +1,21 @@
 import React from "react";
-import Game from "./Game";
+import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+
+import Lobby from "./components/Lobby";
+import Game from "./components/Game";
 import "./App.css";
 
-function App() {
-  return <Game />;
-}
+export default function App() {
+  return (
+    <Router>
+      <div>
+        <Link to="/">Home</Link>
 
-export default App;
+        <Switch>
+          <Route path="/game/:roomID" component={Game} />
+          <Route path="/" component={Lobby} />
+        </Switch>
+      </div>
+    </Router>
+  );
+}

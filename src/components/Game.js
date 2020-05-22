@@ -3,6 +3,7 @@ import axios from "axios";
 import openSocket from "socket.io-client";
 import _ from "lodash";
 import pokerSolver from "pokersolver";
+import { v4 as uuidv4 } from "uuid";
 
 import Hand from "./Hand";
 
@@ -14,7 +15,15 @@ const ps = pokerSolver.Hand;
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
+    let uuid = localStorage.getItem("uuid");
+    if (!uuid) {
+      uuid = uuidv4();
+      localStorage.setItem("uuid", uuid);
+    }
+
     this.state = {
+      uuid,
+      roomID: props.match.params.roomID,
       deckID: "",
       error: "",
       // the thirteen cards to choose from
