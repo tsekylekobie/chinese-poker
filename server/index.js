@@ -14,7 +14,10 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 // DB Setup
-mongoose.connect("mongodb://localhost:test");
+mongoose.connect("mongodb://localhost:test", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+});
 
 // App Setup
 app.set("port", 8080);

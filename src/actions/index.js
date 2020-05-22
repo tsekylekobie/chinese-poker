@@ -1,7 +1,7 @@
 import axios from "axios";
 import { generate } from "shortid";
 
-export function createGame(name) {
+export function createGame(name, callback) {
   const gameId = generate();
 
   const request = axios
@@ -9,7 +9,12 @@ export function createGame(name) {
       gameId,
       creator: [name],
     })
-    .then((response) => response)
+    .then((res) => {
+      if (res.status === 200) {
+        callback(res.data.gameId);
+      }
+      return res;
+    })
     .catch((error) => {
       throw error;
     });
