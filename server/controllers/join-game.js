@@ -1,3 +1,5 @@
+const Game = require("../models/game-model");
+
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
   const userJoined = req.body.userJoined;
@@ -19,9 +21,6 @@ module.exports = (req, res, next) => {
             if (err) {
               return next(err);
             }
-
-            let newTeam = newGame.teams;
-            newTeam.push(0);
 
             newGame.save();
 
