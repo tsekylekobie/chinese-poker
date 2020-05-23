@@ -15,7 +15,6 @@ module.exports = (req, res, next) => {
       users: creator,
       gameStart: false,
       round: 0,
-      deck: [],
     });
 
     newGame.save();

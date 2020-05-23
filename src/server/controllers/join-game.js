@@ -21,9 +21,7 @@ module.exports = (req, res, next) => {
             if (err) {
               return next(err);
             }
-
             newGame.save();
-
             res.json(newGame);
           }
         );

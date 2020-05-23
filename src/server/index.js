@@ -17,6 +17,7 @@ const io = socketIO(server);
 mongoose.connect("mongodb://localhost:test", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
+  useFindAndModify: false,
 });
 
 // App Setup
@@ -43,9 +44,14 @@ io.on("connection", function (socket) {
     console.log("user disconnected");
   });
 
-  socket.on("createRoom", function (id) {
-    socket.join(id);
-    socket.emit("action", { payload: data, type: "CREATE_GAME" });
+  socket.on("joinGame", function (roomId) {
+    console.log("a user is joining", roomId);
+    socket.join(roomId);
+  });
+
+  socket.on("startGame", function (roomId) {
+    console.log("starting ", roomId);
+    io.emit("startGame");
   });
 
   socket.on("submit", (h1, h2, h3) => {

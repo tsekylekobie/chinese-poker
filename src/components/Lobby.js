@@ -1,7 +1,9 @@
 import React from "react";
-// import { v4 as uuidv4 } from "uuid";
+import openSocket from "socket.io-client";
 
 import { createGame, joinGame } from "../actions/index";
+
+const socket = openSocket("http://localhost:8080");
 
 // Error messages
 const NAME_ERR = "Please enter a name";
@@ -10,24 +12,24 @@ const GAMEID_ERR = "Invalid GameID";
 export default class Lobby extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: "" };
-    //   this.state = { uuid: localStorage.getItem("uuid") };
-    //   if (!this.state.uuid) {
-    //     this.state.uuid = uuidv4();
-    //     localStorage.setItem("uuid", this.state.uuid);
-    //   }
+    this.state = { error: "", playerName: localStorage.getItem("playerName") };
     this.setGameIdRef = React.createRef();
     this.setNameRef = React.createRef();
 
     this.joinRoom = this.joinRoom.bind(this);
     this.createRoom = this.createRoom.bind(this);
-    this.redirect = this.redirect.bind(this);
+    this.onSuccess = this.onSuccess.bind(this);
   }
 
-  redirect(data) {
-    data.error
-      ? this.setState({ error: data.error })
-      : this.props.history.push(`/game/${data.gameId}`);
+  onSuccess(data) {
+    if (data.error) {
+      this.setState({ error: data.error });
+    } else {
+      const name = this.setNameRef.current;
+      localStorage.setItem("playerName", name.value);
+      socket.emit("joinGame", data.gameId);
+      this.props.history.push(`/game/${data.gameId}`);
+    }
   }
 
   joinRoom() {
@@ -38,7 +40,7 @@ export default class Lobby extends React.Component {
     } else if (!gameId.value) {
       this.setState({ error: GAMEID_ERR });
     } else {
-      joinGame(gameId.value, name.value, this.redirect);
+      joinGame(gameId.value, name.value, this.onSuccess);
     }
   }
 
@@ -47,7 +49,7 @@ export default class Lobby extends React.Component {
     if (!name.value) {
       this.setState({ error: NAME_ERR });
     } else {
-      createGame(name.value, this.redirect);
+      createGame(name.value, this.onSuccess);
     }
   }
 
@@ -57,7 +59,12 @@ export default class Lobby extends React.Component {
         <button onClick={this.createRoom}>Create room</button>
 
         <input ref={this.setGameIdRef} type="text" placeholder="Game ID" />
-        <input ref={this.setNameRef} type="text" placeholder="Name" />
+        <input
+          ref={this.setNameRef}
+          type="text"
+          placeholder="Name"
+          defaultValue={this.state.playerName}
+        />
 
         <button onClick={this.joinRoom}>Join room</button>
         <span className="error">{this.state.error}</span>

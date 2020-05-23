@@ -4,10 +4,9 @@ export default class Game extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      image: this.props.data.image,
+      name: this.props.data.name,
       suit: this.props.data.suit,
       value: this.props.data.value,
-      code: this.props.data.code,
     };
   }
 
@@ -27,7 +26,7 @@ export default class Game extends React.Component {
         onDragStart={this.onDragStart}
         onDragOver={this.onDragOver}
       >
-        <img alt={text} src={this.state.image} width="75" />
+        <img alt={text} src={`/images/${this.state.name}.png`} width="75" />
       </div>
     );
   }

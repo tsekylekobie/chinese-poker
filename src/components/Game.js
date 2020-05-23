@@ -1,28 +1,25 @@
 import React from "react";
-import axios from "axios";
-import openSocket from "socket.io-client";
 import _ from "lodash";
 import pokerSolver from "pokersolver";
-import { v4 as uuidv4 } from "uuid";
+import openSocket from "socket.io-client";
 
 import Hand from "./Hand";
-
-const socket = openSocket("http://localhost:8080");
-socket.on("winner", (x) => console.log("the winner is ", x));
+import { startGame, getPlayer } from "../actions/index";
 
 const ps = pokerSolver.Hand;
+const socket = openSocket("http://localhost:8080");
 
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
-    let uuid = localStorage.getItem("uuid");
-    if (!uuid) {
-      uuid = uuidv4();
-      localStorage.setItem("uuid", uuid);
+
+    const playerName = localStorage.getItem("playerName");
+    if (!playerName) {
+      this.props.history.push("/");
     }
 
     this.state = {
-      uuid,
+      playerName,
       roomID: props.match.params.roomID,
       deckID: "",
       error: "",
@@ -33,31 +30,33 @@ export default class Game extends React.Component {
       hand2: [],
       hand3: [],
     };
+
+    this.startGame = this.startGame.bind(this);
+    this.startCallback = this.startCallback.bind(this);
+    this.getCardsCallback = this.getCardsCallback.bind(this);
   }
 
   componentDidMount() {
-    axios
-      .get("https://deckofcardsapi.com/api/deck/new/shuffle/?deck_count=1")
-      .then((res) => {
-        this.setState({ deckID: res.data.deck_id });
-        this.getCards();
-      });
+    socket.on("startGame", () => {
+      // Draw cards
+      getPlayer(
+        this.state.roomID,
+        this.state.playerName,
+        this.getCardsCallback
+      );
+    });
   }
 
-  getCards() {
-    axios
-      .get(
-        `https://deckofcardsapi.com/api/deck/${this.state.deckID}/draw/?count=13`
-      )
-      .then((res) => {
-        const cards = res.data.cards;
-        // this.setState({ cards });
-        this.setState({
-          hand1: cards.slice(0, 3),
-          hand2: cards.slice(3, 8),
-          hand3: cards.slice(8),
-        }); // for testing
-      });
+  getCardsCallback(data) {
+    this.setState({ cards: data.hand });
+  }
+
+  startGame() {
+    startGame(this.state.roomID, this.startCallback);
+  }
+
+  startCallback() {
+    socket.emit("startGame", this.state.roomID);
   }
 
   onClick = (e) => {
@@ -90,17 +89,17 @@ export default class Game extends React.Component {
 
   cardToCode = (card) => {
     if (card.value === "10") return "T" + card.suit;
-    return card.code;
+    return card.name;
   };
 
   // removeCard removes given card from all hands
   // Returns new state
-  removeCard = (code) => {
+  removeCard = (name) => {
     const keys = ["hand1", "hand2", "hand3", "cards"];
     const newState = {};
     for (let i in keys) {
       let k = keys[i];
-      newState[k] = _.filter(this.state[k], (x) => x.code !== code);
+      newState[k] = _.filter(this.state[k], (x) => x.name !== name);
     }
     return newState;
   };
@@ -134,8 +133,11 @@ export default class Game extends React.Component {
           >
             {this.state.hand3}
           </Hand>
-          <button onClick={this.onClick} style={{ width: 70 }}>
+          <button className="button" onClick={this.onClick}>
             Submit
+          </button>
+          <button className="button" onClick={this.startGame}>
+            Start
           </button>
           <p className="error">{this.state.error}</p>
         </div>

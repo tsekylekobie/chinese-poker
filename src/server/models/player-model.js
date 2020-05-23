@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 const Card = require("./card-model");
 
 const playerSchema = new Schema({
+  gameId: String,
   playerName: { type: String, lowercase: true },
   player: String,
   score: Number,
