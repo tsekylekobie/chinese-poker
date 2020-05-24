@@ -1,9 +1,9 @@
 import axios from "axios";
 import { generate } from "shortid";
 
-export function getPlayer(gameId, playerName, callback) {
+export function getPlayer(gameId, name, callback) {
   const request = axios
-    .post("/api/get-player", { gameId, playerName })
+    .post("/api/get-player", { gameId, playerName: name.toLowerCase() })
     .then((res) => {
       if (res.status === 200) {
         callback(res.data);

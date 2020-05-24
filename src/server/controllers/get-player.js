@@ -11,7 +11,9 @@ module.exports = (req, res, next) => {
 
     const index = _.findIndex(game.users, (u) => _.isEqual(u, playerName));
     if (index === -1)
-      return res.status(422).send({ error: "Player is not in the game" });
+      return res
+        .status(422)
+        .send({ error: `Player ${playerName} is not in the game` });
 
     const key = `player_${index + 1}`;
     res.json(game[key]);
