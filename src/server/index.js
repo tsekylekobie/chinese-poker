@@ -44,14 +44,20 @@ io.on("connection", function (socket) {
     console.log("user disconnected");
   });
 
-  socket.on("joinGame", function (roomId) {
-    console.log("a user is joining", roomId);
-    socket.join(roomId);
-  });
-
-  socket.on("startGame", function (roomId) {
-    console.log("starting ", roomId);
-    io.emit("startGame");
+  socket.on("action", (action) => {
+    const data = action.payload;
+    switch (action.type) {
+      case "JOIN_GAME":
+        console.log("a user is joining", data.roomId);
+        socket.join(data.roomId);
+        break;
+      case "START_GAME":
+        console.log("starting", data.roomId);
+        io.in(data.roomId).emit("startGame");
+        break;
+      default:
+        null;
+    }
   });
 
   socket.on("submit", (h1, h2, h3) => {

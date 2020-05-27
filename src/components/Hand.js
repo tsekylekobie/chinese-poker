@@ -37,10 +37,11 @@ export default class Hand extends React.Component {
         classes = "hand";
         xs = 12;
     }
-    console.log(children);
+
     return (
       <Grid
         container
+        item
         className={classes}
         direction="row"
         justify="center"

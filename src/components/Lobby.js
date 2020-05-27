@@ -30,7 +30,10 @@ export default class Lobby extends React.Component {
     if (data.error) {
       this.setState({ error: data.error });
     } else {
-      socket.emit("joinGame", data.gameId);
+      socket.emit("action", {
+        type: "JOIN_GAME",
+        payload: { roomId: data.gameId },
+      });
       this.props.history.push(`/game/${data.gameId}`);
     }
   }

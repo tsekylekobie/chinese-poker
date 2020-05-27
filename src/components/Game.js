@@ -1,16 +1,16 @@
 import React from "react";
 import _ from "lodash";
 import { ThemeProvider } from "@material-ui/core/styles";
-import { Container, Grid, Button, TextField } from "@material-ui/core";
+import { Container, Grid, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
 import pokerSolver from "pokersolver";
-import openSocket from "socket.io-client";
+import io from "socket.io-client";
 
 import Hand from "./Hand";
 import { startGame, getPlayer } from "../actions/index";
 
 const ps = pokerSolver.Hand;
-const socket = openSocket("http://localhost:8080");
+const socket = io.connect("http://localhost:8080", { reconnect: true });
 
 export default class Game extends React.Component {
   constructor(props) {
@@ -29,6 +29,7 @@ export default class Game extends React.Component {
       hand1: [],
       hand2: [],
       hand3: [],
+      gameStart: false,
     };
 
     this.startGame = this.startGame.bind(this);
@@ -38,6 +39,7 @@ export default class Game extends React.Component {
 
   componentDidMount() {
     socket.on("startGame", () => {
+      console.log("heard from server");
       // Draw cards
       getPlayer(
         this.state.roomID,
@@ -53,10 +55,14 @@ export default class Game extends React.Component {
 
   startGame() {
     startGame(this.state.roomID, this.startCallback);
+    this.setState({ gameStart: true });
   }
 
   startCallback() {
-    socket.emit("startGame", this.state.roomID);
+    socket.emit("action", {
+      type: "START_GAME",
+      payload: { roomId: this.state.roomID },
+    });
   }
 
   onClick = (e) => {
@@ -109,6 +115,8 @@ export default class Game extends React.Component {
   };
 
   render() {
+    const { error, gameStart, hand1, hand2, hand3, cards } = this.state;
+
     return (
       <ThemeProvider theme={this.theme}>
         <Container className="root">
@@ -118,29 +126,27 @@ export default class Game extends React.Component {
             justify="center"
             alignItems="center"
           >
-            {this.state.error && (
-              <Alert severity="error">{this.state.error}</Alert>
-            )}
+            {this.state.error && <Alert severity="error">{error}</Alert>}
             <Hand
               name={"hand1"}
               onChange={this.onChange}
               removeCard={this.removeCard}
             >
-              {this.state.hand1}
+              {hand1}
             </Hand>
             <Hand
               name={"hand2"}
               onChange={this.onChange}
               removeCard={this.removeCard}
             >
-              {this.state.hand2}
+              {hand2}
             </Hand>
             <Hand
               name={"hand3"}
               onChange={this.onChange}
               removeCard={this.removeCard}
             >
-              {this.state.hand3}
+              {hand3}
             </Hand>
             <Grid
               container
@@ -157,21 +163,23 @@ export default class Game extends React.Component {
               >
                 Submit
               </Button>
-              <Button
-                variant="contained"
-                className="button"
-                color="primary"
-                onClick={this.startGame}
-              >
-                Start
-              </Button>
+              {!gameStart && (
+                <Button
+                  variant="contained"
+                  className="button"
+                  color="primary"
+                  onClick={this.startGame}
+                >
+                  Start
+                </Button>
+              )}
             </Grid>
             <Hand
               name={"cards"}
               onChange={this.onChange}
               removeCard={this.removeCard}
             >
-              {this.state.cards}
+              {cards}
             </Hand>
           </Grid>
         </Container>
