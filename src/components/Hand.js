@@ -1,4 +1,5 @@
 import React from "react";
+import { Grid } from "@material-ui/core";
 
 import Card from "./Card";
 
@@ -20,13 +21,38 @@ export default class Hand extends React.Component {
   };
 
   render() {
-    const { children } = this.props;
+    const { children, name } = this.props;
+    let classes, xs;
+    switch (name) {
+      case "hand1":
+        classes = "hand three";
+        xs = 3;
+        break;
+      case "hand2":
+      case "hand3":
+        classes = "hand five";
+        xs = 5;
+        break;
+      default:
+        classes = "hand";
+        xs = 12;
+    }
+    console.log(children);
     return (
-      <div className="row" onDrop={this.onDrop} onDragOver={this.onDragOver}>
+      <Grid
+        container
+        className={classes}
+        direction="row"
+        justify="center"
+        alignItems="center"
+        xs={xs}
+        onDrop={this.onDrop}
+        onDragOver={this.onDragOver}
+      >
         {children.map((card) => (
           <Card key={card.name} data={card} />
         ))}
-      </div>
+      </Grid>
     );
   }
 }

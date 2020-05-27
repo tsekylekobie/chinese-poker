@@ -54,7 +54,12 @@ export default class App extends React.Component {
         />
         <Toolbar />
         <Switch>
-          <Route path="/game/:roomID" component={Game} />
+          <Route
+            path="/game/:roomID"
+            render={(props) => (
+              <Game {...props} theme={theme} getName={this.getName} />
+            )}
+          />
           <Route
             path="/"
             render={(props) => (

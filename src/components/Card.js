@@ -19,14 +19,14 @@ export default class Game extends React.Component {
   };
 
   render() {
-    const text = `${this.state.suit} of ${this.state.value}`;
+    const { name } = this.state;
     return (
       <div
         draggable={true}
         onDragStart={this.onDragStart}
         onDragOver={this.onDragOver}
       >
-        <img alt={text} src={`/images/${this.state.name}.png`} width="75" />
+        <img alt={name} src={`/images/${name}.png`} height="100" />
       </div>
     );
   }

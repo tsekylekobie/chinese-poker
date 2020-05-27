@@ -15,10 +15,12 @@ const GAMEID_ERR = "Invalid GameID";
 export default class Lobby extends React.Component {
   constructor(props) {
     super(props);
-    this.state = { error: "" };
-    this.setGameIdRef = React.createRef();
     this.getName = props.getName;
     this.theme = props.theme;
+
+    this.state = { error: "" };
+
+    this.setGameIdRef = React.createRef();
     this.joinRoom = this.joinRoom.bind(this);
     this.createRoom = this.createRoom.bind(this);
     this.onSuccess = this.onSuccess.bind(this);

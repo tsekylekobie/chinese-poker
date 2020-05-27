@@ -1,5 +1,8 @@
 import React from "react";
 import _ from "lodash";
+import { ThemeProvider } from "@material-ui/core/styles";
+import { Container, Grid, Button, TextField } from "@material-ui/core";
+import { Alert } from "@material-ui/lab/";
 import pokerSolver from "pokersolver";
 import openSocket from "socket.io-client";
 
@@ -12,14 +15,11 @@ const socket = openSocket("http://localhost:8080");
 export default class Game extends React.Component {
   constructor(props) {
     super(props);
-
-    const playerName = localStorage.getItem("playerName");
-    if (!playerName) {
-      this.props.history.push("/");
-    }
+    this.theme = props.theme;
+    this.getName = props.getName;
 
     this.state = {
-      playerName,
+      playerName: this.getName(),
       roomID: props.match.params.roomID,
       deckID: "",
       error: "",
@@ -110,46 +110,72 @@ export default class Game extends React.Component {
 
   render() {
     return (
-      <div className="flexbox">
-        <div className="flexbox">
-          <Hand
-            name={"hand1"}
-            onChange={this.onChange}
-            removeCard={this.removeCard}
+      <ThemeProvider theme={this.theme}>
+        <Container className="root">
+          <Grid
+            container
+            direction="column"
+            justify="center"
+            alignItems="center"
           >
-            {this.state.hand1}
-          </Hand>
-          <Hand
-            name={"hand2"}
-            onChange={this.onChange}
-            removeCard={this.removeCard}
-          >
-            {this.state.hand2}
-          </Hand>
-          <Hand
-            name={"hand3"}
-            onChange={this.onChange}
-            removeCard={this.removeCard}
-          >
-            {this.state.hand3}
-          </Hand>
-          <button className="button" onClick={this.onClick}>
-            Submit
-          </button>
-          <button className="button" onClick={this.startGame}>
-            Start
-          </button>
-          <p className="error">{this.state.error}</p>
-        </div>
-
-        <Hand
-          name={"cards"}
-          onChange={this.onChange}
-          removeCard={this.removeCard}
-        >
-          {this.state.cards}
-        </Hand>
-      </div>
+            {this.state.error && (
+              <Alert severity="error">{this.state.error}</Alert>
+            )}
+            <Hand
+              name={"hand1"}
+              onChange={this.onChange}
+              removeCard={this.removeCard}
+            >
+              {this.state.hand1}
+            </Hand>
+            <Hand
+              name={"hand2"}
+              onChange={this.onChange}
+              removeCard={this.removeCard}
+            >
+              {this.state.hand2}
+            </Hand>
+            <Hand
+              name={"hand3"}
+              onChange={this.onChange}
+              removeCard={this.removeCard}
+            >
+              {this.state.hand3}
+            </Hand>
+            <Grid
+              container
+              className="control"
+              direction="row"
+              justify="center"
+              alignItems="center"
+            >
+              <Button
+                variant="contained"
+                className="button"
+                color="primary"
+                onClick={this.onClick}
+              >
+                Submit
+              </Button>
+              <Button
+                variant="contained"
+                className="button"
+                color="primary"
+                onClick={this.startGame}
+              >
+                Start
+              </Button>
+            </Grid>
+            <Hand
+              name={"cards"}
+              onChange={this.onChange}
+              removeCard={this.removeCard}
+            >
+              {this.state.cards}
+            </Hand>
+          </Grid>
+        </Container>
+      </ThemeProvider>
     );
   }
 }

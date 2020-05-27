@@ -6,14 +6,6 @@
   flex-grow: 1;
 }
 
-.modal {
-  position: "absolute";
-  width: 400px;
-  background-color: #fff;
-  /* box-shadow: theme.shadows[5]; */
-  padding: 16px 32px 24px;
-}
-
 .control {
   padding: 8px !important;
 }
@@ -22,18 +14,13 @@
   margin: 8px !important;
 }
 
-.flexbox {
-  display: flex;
-  flex-direction: column;
-}
-
-.flexbox .row {
-  display: flex;
-  flex-direction: row;
-  background-color: lightgray;
-  height: 100px;
-  padding: 10px;
-  margin-bottom: 5px;
+.hand {
+  padding: 12px;
+  margin: 16px !important;
+  box-sizing: content-box;
+  min-height: 127px;
+  border-radius: 4px;
+  background-color: #efe5fd; /* light purple */
 }
 
 .error {
