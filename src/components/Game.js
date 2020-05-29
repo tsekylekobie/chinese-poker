@@ -1,14 +1,11 @@
-import React, { useState } from "react";
-import _ from "lodash";
+import React, { createContext, useState, useEffect, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
-import io from "socket.io-client";
 
+import { AppContext } from "../App";
 import Hand from "./Hand";
-import { startGame as startGameAction, getPlayer } from "../actions/index";
-
-const socket = io.connect("http://localhost:8080", { reconnect: true });
+import { startGame, getPlayer, getGame } from "../actions/index";
 
 // Error messages
 const SIZE_ERR = "Invalid hand size";
@@ -26,8 +23,11 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export const CardsContext = createContext();
+
 function Game(props) {
   const classes = useStyles();
+  const { socket, name } = useContext(AppContext);
 
   const roomId = props.match.params.roomID;
   const [error, setError] = useState("");
@@ -39,6 +39,32 @@ function Game(props) {
     myHand: [],
   });
 
+  const fetchHand = () =>
+    getPlayer(roomId, name, (data) => {
+      setHands((state) => ({
+        ...state,
+        myHand: data.hand,
+      }));
+    });
+
+  useEffect(function getGameInfo() {
+    getGame(roomId, (data) => {
+      if (data.gameStart) {
+        setGameStart(true);
+        fetchHand();
+      }
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    socket.on("START_GAME", () => {
+      setGameStart(true);
+      fetchHand();
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   function checkHandSizes() {
     const { hand1, hand2, hand3 } = hands;
     return hand1.length === 3 && hand2.length === 5 && hand3.length === 5;
@@ -47,47 +73,32 @@ function Game(props) {
   function submitCards() {
     const { hand1, hand2, hand3 } = hands;
     if (!checkHandSizes()) {
-      setError({ error: SIZE_ERR });
+      setError(SIZE_ERR);
     } else {
       socket.emit("submit", hand1, hand2, hand3);
     }
   }
 
-  // removeCard removes given card from all hands
-  // Returns new state
-  function removeCard(name) {
-    const removeFromHand = (arr) => _.filter(arr, (x) => x.name !== name);
-    setHands((prevState) => {
-      _.forEach(prevState, (arr) => removeFromHand(arr));
-    });
-  }
-
-  function startGame() {
-    startGameAction(roomId, () =>
+  function startGameHandler() {
+    startGame(roomId, () =>
       socket.emit("action", {
         type: "START_GAME",
         payload: { roomId },
       })
     );
-    setGameStart(true);
   }
-
   return (
     <Container className={classes.root}>
       <Grid container direction="column" justify="center" alignItems="center">
         {error && <Alert severity="error">{error}</Alert>}
-        <Hand name={"hand1"} removeCard={removeCard}>
-          {hands.hand1}
-        </Hand>
-        <Hand name={"hand2"} removeCard={removeCard}>
-          {hands.hand2}
-        </Hand>
-        <Hand name={"hand3"} removeCard={removeCard}>
-          {hands.hand3}
-        </Hand>
+        <CardsContext.Provider value={{ hands, setHands }}>
+          <Hand name={"hand1"}>{hands.hand1}</Hand>
+          <Hand name={"hand2"}>{hands.hand2}</Hand>
+          <Hand name={"hand3"}>{hands.hand3}</Hand>
+        </CardsContext.Provider>
         <Grid
           container
-          className="control"
+          className={classes.control}
           direction="row"
           justify="center"
           alignItems="center"
@@ -95,7 +106,7 @@ function Game(props) {
           {gameStart ? (
             <Button
               variant="contained"
-              className="button"
+              className={classes.button}
               color="primary"
               onClick={submitCards}
             >
@@ -104,17 +115,17 @@ function Game(props) {
           ) : (
             <Button
               variant="contained"
-              className="button"
+              className={classes.button}
               color="primary"
-              onClick={startGame}
+              onClick={startGameHandler}
             >
               Start
             </Button>
           )}
         </Grid>
-        <Hand name={"myHand"} removeCard={removeCard}>
-          {hands.myHand}
-        </Hand>
+        <CardsContext.Provider value={{ hands, setHands }}>
+          <Hand name={"myHand"}>{hands.myHand}</Hand>
+        </CardsContext.Provider>
       </Grid>
     </Container>
   );

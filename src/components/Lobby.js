@@ -1,12 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button, TextField } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
-import openSocket from "socket.io-client";
 
+import { AppContext } from "../App";
 import { createGame, joinGame } from "../actions/index";
-
-const socket = openSocket("http://localhost:8080");
 
 // Error messages
 const NAME_ERR = "Please enter a name";
@@ -27,9 +25,10 @@ const useStyles = makeStyles((theme) => ({
 
 function Lobby(props) {
   const classes = useStyles();
+  const { socket, name } = useContext(AppContext);
 
   const [error, setError] = useState("");
-  const gameIdEl = useRef(null);
+  const [gameId, setGameId] = useState("");
 
   function onSuccess(data) {
     if (data.error) {
@@ -44,7 +43,6 @@ function Lobby(props) {
   }
 
   function createRoom() {
-    const name = props.getName();
     if (!name) {
       setError(NAME_ERR);
     } else {
@@ -53,14 +51,12 @@ function Lobby(props) {
   }
 
   function joinRoom() {
-    const gameId = gameIdEl.current;
-    const name = props.getName();
     if (!name) {
       setError(NAME_ERR);
-    } else if (!gameId.value) {
+    } else if (!gameId) {
       setError(GAMEID_ERR);
     } else {
-      joinGame(gameId.value, name, onSuccess);
+      joinGame(gameId, name, onSuccess);
     }
   }
 
@@ -75,7 +71,12 @@ function Lobby(props) {
           justify="center"
           alignItems="center"
         >
-          <TextField ref={gameIdEl} label="Game ID" variant="outlined" />
+          <TextField
+            label="Game ID"
+            variant="outlined"
+            defaultValue={gameId}
+            onChange={(e) => setGameId(e.target.value)}
+          />
         </Grid>
         <Grid
           container

@@ -53,7 +53,7 @@ io.on("connection", function (socket) {
         break;
       case "START_GAME":
         console.log("starting", data.roomId);
-        io.in(data.roomId).emit("startGame");
+        io.sockets.in(data.roomId).emit("START_GAME");
         break;
       default:
         null;

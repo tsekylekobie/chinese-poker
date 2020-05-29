@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React, { createContext, useState, useEffect } from "react";
 import { Router, Switch, Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
+import io from "socket.io-client";
 import {
   createMuiTheme,
   makeStyles,
@@ -12,6 +13,9 @@ import EditIcon from "@material-ui/icons/Edit";
 import Lobby from "./components/Lobby";
 import Game from "./components/Game";
 import "./App.css";
+
+const ENDPOINT = "http://localhost:8080";
+const socket = io(ENDPOINT);
 
 const useStyles = makeStyles((theme) => ({
   title: {
@@ -39,7 +43,7 @@ const theme = createMuiTheme({
   },
 });
 
-export const AppContext = React.createContext();
+export const AppContext = createContext();
 
 const history = createBrowserHistory();
 
@@ -47,10 +51,6 @@ function App() {
   const classes = useStyles();
   const [name, setName] = useState(localStorage.getItem("playerName"));
   const [open, toggleDisplay] = useState(false);
-
-  const getName = () => {
-    return localStorage.getItem("playerName");
-  };
 
   useEffect(
     function persistName() {
@@ -95,16 +95,12 @@ function App() {
           </Toolbar>
         </AppBar>
         <Toolbar />
-        <Switch>
-          <Route
-            path="/game/:roomID"
-            render={(props) => <Game {...props} getName={getName} />}
-          />
-          <Route
-            path="/"
-            render={(props) => <Lobby {...props} getName={getName} />}
-          />
-        </Switch>
+        <AppContext.Provider value={{ socket, name }}>
+          <Switch>
+            <Route path="/game/:roomID" component={Game} />
+            <Route path="/" component={Lobby} />
+          </Switch>
+        </AppContext.Provider>
       </Router>
     </ThemeProvider>
   );

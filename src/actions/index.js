@@ -2,7 +2,7 @@ import axios from "axios";
 import { generate } from "shortid";
 
 export function getPlayer(gameId, name, callback) {
-  const request = axios
+  axios
     .post("/api/get-player", { gameId, playerName: name.toLowerCase() })
     .then((res) => {
       if (res.status === 200) {
@@ -13,17 +13,21 @@ export function getPlayer(gameId, name, callback) {
     .catch((error) => {
       throw error;
     });
+}
 
-  return {
-    type: "GET_CARDS",
-    payload: request,
-  };
+export function getGame(gameId, callback, notFoundHandler) {
+  axios.post("/api/get-game", { gameId }).then((res) => {
+    if (res.status === 200) {
+      callback(res.data);
+    }
+    return res;
+  });
 }
 
 export function createGame(name, callback) {
   const gameId = generate();
 
-  const request = axios
+  axios
     .post("/api/create-game", {
       gameId,
       creator: [name.toLowerCase()],
@@ -37,15 +41,10 @@ export function createGame(name, callback) {
     .catch((error) => {
       throw error;
     });
-
-  return {
-    type: "CREATE_GAME",
-    payload: request,
-  };
 }
 
 export function joinGame(gameId, name, callback) {
-  const request = axios
+  axios
     .post("/api/join-game", {
       gameId,
       userJoined: name.toLowerCase(),
@@ -59,15 +58,10 @@ export function joinGame(gameId, name, callback) {
     .catch((error) => {
       throw error;
     });
-
-  return {
-    type: "JOIN_GAME",
-    payload: request,
-  };
 }
 
 export function startGame(gameId, callback) {
-  const request = axios
+  axios
     .post("/api/start-game", {
       gameId,
     })
@@ -78,9 +72,4 @@ export function startGame(gameId, callback) {
     .catch((error) => {
       throw error;
     });
-
-  return {
-    type: "START_GAME",
-    payload: request,
-  };
 }
