@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
@@ -106,6 +107,37 @@ function Game(props) {
     });
   }
 
+  function sortByRank() {
+    const sort = (card) => {
+      switch (card.name[0]) {
+        case "0":
+          return 10;
+        case "J":
+          return 11;
+        case "Q":
+          return 12;
+        case "K":
+          return 13;
+        case "A":
+          return 1;
+        default:
+          return parseInt(card.name[0]);
+      }
+    };
+    setHands((state) => ({
+      ...state,
+      myHand: _.sortBy(state.myHand, sort),
+    }));
+  }
+
+  function sortBySuit() {
+    const sort = (card) => card.suit;
+    setHands((state) => ({
+      ...state,
+      myHand: _.sortBy(state.myHand, sort),
+    }));
+  }
+
   let bottomDiv;
   switch (gameStatus) {
     case STAGES.WAIT:
@@ -122,14 +154,33 @@ function Game(props) {
       break;
     case STAGES.PLAY:
       bottomDiv = (
-        <Button
-          variant="contained"
-          className={classes.button}
-          color="primary"
-          onClick={submitCards}
-        >
-          Submit
-        </Button>
+        <CardsContext.Provider value={{ hands, setHands }}>
+          <Hand name={"myHand"}>{hands.myHand}</Hand>
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="secondary"
+            onClick={sortByRank}
+          >
+            Sort by Rank
+          </Button>
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="secondary"
+            onClick={sortBySuit}
+          >
+            Sort by Suit
+          </Button>
+          <Button
+            variant="contained"
+            className={classes.button}
+            color="primary"
+            onClick={submitCards}
+          >
+            Submit
+          </Button>
+        </CardsContext.Provider>
       );
       break;
     case STAGES.SUBMIT:
@@ -162,9 +213,6 @@ function Game(props) {
         >
           {bottomDiv}
         </Grid>
-        <CardsContext.Provider value={{ hands, setHands }}>
-          <Hand name={"myHand"}>{hands.myHand}</Hand>
-        </CardsContext.Provider>
       </Grid>
     </Container>
   );
