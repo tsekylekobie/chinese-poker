@@ -9,7 +9,11 @@ const playerSchema = new Schema({
   playerName: { type: String, lowercase: true },
   player: String,
   score: Number,
+  submitted: Boolean,
   hand: [Card.schema],
+  hand1: [Card.schema],
+  hand2: [Card.schema],
+  hand3: [Card.schema],
 });
 
 const Player = mongoose.model("Player", playerSchema);

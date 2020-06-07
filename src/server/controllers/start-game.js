@@ -43,8 +43,10 @@ module.exports = (req, res, next) => {
           playerName: existingGame.users[i],
           player: `player_${i + 1}`,
           score: 0,
+          submitted: false,
           hand: newDeck.draw(13),
         });
+        player.save();
         existingGame[player.player] = player;
       }
 

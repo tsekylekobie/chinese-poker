@@ -73,3 +73,19 @@ export function startGame(gameId, callback) {
       throw error;
     });
 }
+
+export function submitHands(gameId, name, hands, callback) {
+  axios
+    .post("/api/submit-hands", {
+      gameId,
+      playerName: name.toLowerCase(),
+      submitted: hands,
+    })
+    .then((res) => {
+      callback(res.data);
+      return res;
+    })
+    .catch((error) => {
+      throw error;
+    });
+}

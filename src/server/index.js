@@ -55,6 +55,9 @@ io.on("connection", function (socket) {
         console.log("starting", data.roomId);
         io.sockets.in(data.roomId).emit("START_GAME");
         break;
+      case "SUBMIT_HANDS":
+        console.log(data.name, "submitted his hands");
+        break;
       default:
         null;
     }

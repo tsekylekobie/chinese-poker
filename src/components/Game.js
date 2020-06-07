@@ -5,7 +5,7 @@ import { Alert } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
 import Hand from "./Hand";
-import { startGame, getPlayer, getGame } from "../actions/index";
+import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
 import { STAGES } from "../common/constants";
 
 // Error messages
@@ -73,11 +73,16 @@ function Game(props) {
   }
 
   function submitCards() {
-    const { hand1, hand2, hand3 } = hands;
     if (!checkHandSizes()) {
       setError(SIZE_ERR);
     } else {
-      socket.emit("submit", hand1, hand2, hand3);
+      submitHands(roomId, name, hands, () => {
+        setGameStatus(STAGES.SUBMIT);
+        socket.emit("action", {
+          type: "SUBMIT_HANDS",
+          payload: { name },
+        });
+      });
     }
   }
 
@@ -89,10 +94,60 @@ function Game(props) {
       })
     );
   }
+
+  // For testing purposes
+  function autoSetHands() {
+    const { myHand } = hands;
+    setHands({
+      myHand: [],
+      hand1: myHand.slice(0, 3),
+      hand2: myHand.slice(3, 8),
+      hand3: myHand.slice(8, 13),
+    });
+  }
+
+  let bottomDiv;
+  switch (gameStatus) {
+    case STAGES.WAIT:
+      bottomDiv = (
+        <Button
+          variant="contained"
+          className={classes.button}
+          color="primary"
+          onClick={startGameHandler}
+        >
+          Start
+        </Button>
+      );
+      break;
+    case STAGES.PLAY:
+      bottomDiv = (
+        <Button
+          variant="contained"
+          className={classes.button}
+          color="primary"
+          onClick={submitCards}
+        >
+          Submit
+        </Button>
+      );
+      break;
+    case STAGES.SUBMIT:
+      bottomDiv = <div>Waiting for other players...</div>;
+      break;
+    case STAGES.JOKER:
+    case STAGES.PREDICT:
+    case STAGES.RESULT:
+    case STAGES.END:
+    default:
+      bottomDiv = <div />;
+  }
+
   return (
     <Container className={classes.root}>
       <Grid container direction="column" justify="center" alignItems="center">
         {error && <Alert severity="error">{error}</Alert>}
+        <Button onClick={autoSetHands}>Set hands</Button>
         <CardsContext.Provider value={{ hands, setHands }}>
           <Hand name={"hand1"}>{hands.hand1}</Hand>
           <Hand name={"hand2"}>{hands.hand2}</Hand>
@@ -105,25 +160,7 @@ function Game(props) {
           justify="center"
           alignItems="center"
         >
-          {gameStatus === STAGES.PLAY ? (
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={submitCards}
-            >
-              Submit
-            </Button>
-          ) : (
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={startGameHandler}
-            >
-              Start
-            </Button>
-          )}
+          {bottomDiv}
         </Grid>
         <CardsContext.Provider value={{ hands, setHands }}>
           <Hand name={"myHand"}>{hands.myHand}</Hand>
