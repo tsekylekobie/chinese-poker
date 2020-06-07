@@ -1,31 +1,16 @@
+const { RANKS, SUITS, STAGES } = require("../../common/constants");
+
 const Game = require("../models/game-model");
 const Player = require("../models/player-model");
 const Card = require("../models/card-model");
 const Deck = require("card-deck");
-
-const cardName = [
-  "2",
-  "3",
-  "4",
-  "5",
-  "6",
-  "7",
-  "8",
-  "9",
-  "0",
-  "J",
-  "Q",
-  "K",
-  "A",
-];
-const cardSuit = ["Club", "Spade", "Diamond", "Heart"];
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
 
   Game.model.findOneAndUpdate(
     { gameId },
-    { gameStart: true },
+    { gameStatus: STAGES.PLAY },
     { new: true },
     (err, existingGame) => {
       if (err) {
@@ -38,13 +23,13 @@ module.exports = (req, res, next) => {
 
       // Create a deck
       const cards = [];
-      for (let i = 0; i < cardName.length; i++) {
-        for (let j = 0; j < cardSuit.length; j++) {
+      for (let i = 0; i < RANKS.length; i++) {
+        for (let j = 0; j < SUITS.length; j++) {
           cards.push(
             new Card.model({
-              name: cardName[i] + cardSuit[j][0],
-              suit: cardSuit[j],
-              value: cardName === "0" ? "10" : cardName[i],
+              name: RANKS[i] + SUITS[j][0],
+              suit: SUITS[j],
+              value: RANKS === "0" ? "10" : RANKS[i],
             })
           );
         }

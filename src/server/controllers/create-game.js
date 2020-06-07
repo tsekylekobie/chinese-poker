@@ -1,4 +1,5 @@
 const Game = require("../models/game-model");
+const { STAGES } = require("../../common/constants");
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
@@ -13,7 +14,7 @@ module.exports = (req, res, next) => {
     const newGame = new Game.model({
       gameId,
       users: creator,
-      gameStart: false,
+      gameStatus: STAGES.WAIT,
       round: 0,
     });
 

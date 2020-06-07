@@ -7,7 +7,7 @@ module.exports = (req, res, next) => {
     }
 
     if (!game) {
-      return res.status(422).send({ error: "Game does not exist" });
+      return res.send({ error: "Game does not exist" });
     }
 
     res.json(game);

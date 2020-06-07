@@ -8,7 +8,7 @@ const gameSchema = new Schema(
   {
     gameId: { type: String, unique: true },
     users: [String],
-    gameStart: Boolean,
+    gameStatus: Number,
     round: Number,
     player_1: Player.schema,
     player_2: Player.schema,

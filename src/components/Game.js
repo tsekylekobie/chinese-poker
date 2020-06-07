@@ -6,6 +6,7 @@ import { Alert } from "@material-ui/lab/";
 import { AppContext } from "../App";
 import Hand from "./Hand";
 import { startGame, getPlayer, getGame } from "../actions/index";
+import { STAGES } from "../common/constants";
 
 // Error messages
 const SIZE_ERR = "Invalid hand size";
@@ -31,7 +32,7 @@ function Game(props) {
 
   const roomId = props.match.params.roomID;
   const [error, setError] = useState("");
-  const [gameStart, setGameStart] = useState(false);
+  const [gameStatus, setGameStatus] = useState(STAGES.WAIT);
   const [hands, setHands] = useState({
     hand1: [],
     hand2: [],
@@ -49,8 +50,9 @@ function Game(props) {
 
   useEffect(function getGameInfo() {
     getGame(roomId, (data) => {
-      if (data.gameStart) {
-        setGameStart(true);
+      // If the game has started, then go to the appropriate stage
+      if (data.gameStatus !== STAGES.WAIT) {
+        setGameStatus(data.gameStatus);
         fetchHand();
       }
     });
@@ -59,7 +61,7 @@ function Game(props) {
 
   useEffect(() => {
     socket.on("START_GAME", () => {
-      setGameStart(true);
+      setGameStatus(STAGES.PLAY);
       fetchHand();
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +105,7 @@ function Game(props) {
           justify="center"
           alignItems="center"
         >
-          {gameStart ? (
+          {gameStatus === STAGES.PLAY ? (
             <Button
               variant="contained"
               className={classes.button}

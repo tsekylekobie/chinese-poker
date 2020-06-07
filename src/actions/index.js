@@ -15,7 +15,7 @@ export function getPlayer(gameId, name, callback) {
     });
 }
 
-export function getGame(gameId, callback, notFoundHandler) {
+export function getGame(gameId, callback) {
   axios.post("/api/get-game", { gameId }).then((res) => {
     if (res.status === 200) {
       callback(res.data);
