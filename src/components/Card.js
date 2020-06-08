@@ -1,33 +1,54 @@
-import React from "react";
+import React, { useContext } from "react";
+import { makeStyles } from "@material-ui/core/styles";
+import { CardsContext } from "./Game";
+import { STAGES } from "../common/constants";
 
-export default class Game extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {
-      name: this.props.data.name,
-      suit: this.props.data.suit,
-      value: this.props.data.value,
-    };
-  }
+const useStyles = makeStyles((theme) => ({
+  root: {
+    position: "relative",
+  },
+  highlighted: {
+    backgroundColor: theme.palette.secondary.main,
+    opacity: 0.4,
+    position: "absolute",
+    width: "100%",
+    height: 100,
+  },
+}));
 
-  onDragStart = (e) => {
-    e.dataTransfer.setData("text", JSON.stringify(this.state));
+function Card(props) {
+  const classes = useStyles();
+  const { gameStatus, highlight, toggleHighlight } = useContext(CardsContext);
+  const { name } = props.data;
+
+  const onDragStart = (e) => {
+    e.dataTransfer.setData("text", JSON.stringify(props.data));
   };
 
-  onDragOver = (e) => {
+  const onDragOver = (e) => {
     e.stopPropagation();
   };
 
-  render() {
-    const { name } = this.state;
-    return (
-      <div
-        draggable={true}
-        onDragStart={this.onDragStart}
-        onDragOver={this.onDragOver}
-      >
-        <img alt={name} src={`/images/${name}.png`} height="100" />
-      </div>
-    );
-  }
+  const onClick = () => {
+    if (highlight === name) {
+      toggleHighlight("");
+    } else {
+      toggleHighlight(name);
+    }
+  };
+
+  return (
+    <div
+      className={classes.root}
+      draggable={gameStatus === STAGES.PLAY}
+      onDragStart={onDragStart}
+      onDragOver={onDragOver}
+      onClick={gameStatus === STAGES.JOKER ? onClick : null}
+    >
+      <div className={highlight === name ? classes.highlighted : null}></div>
+      <img alt={name} src={`/images/${name}.png`} height="100" />
+    </div>
+  );
 }
+
+export default Card;

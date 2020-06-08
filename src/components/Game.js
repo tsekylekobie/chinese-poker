@@ -47,6 +47,7 @@ function Game(props) {
   });
   const [joker, setJoker] = useState(false);
   const [seconds, setSeconds] = useState(10);
+  const [highlight, toggleHighlight] = useState("");
 
   const updateJoker = (_, newStatus) => {
     if (newStatus !== null) setJoker(newStatus);
@@ -77,7 +78,6 @@ function Game(props) {
       fetchHand();
     });
     socket.on("ALL_SUBMITTED", () => {
-      console.log("ALL_SUBMITTED");
       setGameStatus(STAGES.JOKER);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,7 +88,7 @@ function Game(props) {
     if (seconds === 0) {
       clearInterval(interval);
       setSeconds(10);
-      setGameStatus(STAGES.PREDICT);
+      // setGameStatus(STAGES.PREDICT);
     } else if (gameStatus === STAGES.JOKER) {
       interval = setInterval(() => setSeconds((seconds) => seconds - 1), 1000);
     }
@@ -191,7 +191,7 @@ function Game(props) {
       break;
     case STAGES.PLAY:
       bottomDiv = (
-        <CardsContext.Provider value={{ hands, setHands }}>
+        <CardsContext.Provider value={{ hands, setHands, gameStatus }}>
           <Hand name={"myHand"}>{hands.myHand}</Hand>
           <Button
             variant="contained"
@@ -227,7 +227,7 @@ function Game(props) {
       bottomDiv = (
         <Grid container direction="column" alignItems="center" spacing={1}>
           <Grid item xs={12}>
-            Time remaining: {seconds} sec
+            <b>Time remaining:</b> {seconds} sec
           </Grid>
           <Grid item xs={12}>
             Use a joker this round?
@@ -246,6 +246,9 @@ function Game(props) {
               </ToggleButton>
             </ToggleButtonGroup>
           </Grid>
+          <Grid item xs={12} style={{ fontSize: 12 }}>
+            If yes, click the card you want to change.
+          </Grid>
         </Grid>
       );
       break;
@@ -261,7 +264,9 @@ function Game(props) {
       <Grid container direction="column" justify="center" alignItems="center">
         {error && <Alert severity="error">{error}</Alert>}
         <Button onClick={autoSetHands}>Set hands</Button>
-        <CardsContext.Provider value={{ hands, setHands }}>
+        <CardsContext.Provider
+          value={{ hands, setHands, gameStatus, highlight, toggleHighlight }}
+        >
           <Hand name={"hand1"}>{hands.hand1}</Hand>
           <Hand name={"hand2"}>{hands.hand2}</Hand>
           <Hand name={"hand3"}>{hands.hand3}</Hand>
