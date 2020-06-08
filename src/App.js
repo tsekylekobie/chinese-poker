@@ -40,6 +40,9 @@ const theme = createMuiTheme({
     error: {
       main: "#B00020", // red
     },
+    action: {
+      active: "#6200EE", // purple
+    },
   },
 });
 
@@ -62,7 +65,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <Router history={history}>
-        <AppBar position="fixed" color="primary">
+        <AppBar position="static" color="primary">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
               <span
@@ -94,7 +97,6 @@ function App() {
             <Button color="inherit">Rules</Button>
           </Toolbar>
         </AppBar>
-        <Toolbar />
         <AppContext.Provider value={{ socket, name }}>
           <Switch>
             <Route path="/game/:roomID" component={Game} />

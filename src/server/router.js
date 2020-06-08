@@ -6,8 +6,8 @@ const startGame = require("./controllers/start-game");
 const submitHands = require("./controllers/submit-hands");
 
 module.exports = function router(app) {
-  app.post("/api/get-player", getPlayer);
-  app.post("/api/get-game", getGame);
+  app.get("/api/get-player", getPlayer);
+  app.get("/api/get-game", getGame);
   app.post("/api/create-game", createGame);
   app.post("/api/join-game", joinGame);
   app.post("/api/start-game", startGame);

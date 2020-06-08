@@ -2,7 +2,7 @@ import React, { createContext, useState, useEffect, useContext } from "react";
 import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button } from "@material-ui/core";
-import { Alert } from "@material-ui/lab/";
+import { Alert, ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
 import Hand from "./Hand";
@@ -23,6 +23,11 @@ const useStyles = makeStyles((theme) => ({
   button: {
     margin: theme.spacing(1),
   },
+  toggleButtonGroup: {
+    padding: theme.spacing(1),
+    color: theme.palette.primary.main,
+    borderRadius: 20,
+  },
 }));
 
 export const CardsContext = createContext();
@@ -40,6 +45,12 @@ function Game(props) {
     hand3: [],
     myHand: [],
   });
+  const [joker, setJoker] = useState(false);
+  const [seconds, setSeconds] = useState(10);
+
+  const updateJoker = (_, newStatus) => {
+    if (newStatus !== null) setJoker(newStatus);
+  };
 
   const fetchHand = () =>
     getPlayer(roomId, name, (data) => {
@@ -65,8 +76,24 @@ function Game(props) {
       setGameStatus(STAGES.PLAY);
       fetchHand();
     });
+    socket.on("ALL_SUBMITTED", () => {
+      console.log("ALL_SUBMITTED");
+      setGameStatus(STAGES.JOKER);
+    });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    let interval = null;
+    if (seconds === 0) {
+      clearInterval(interval);
+      setSeconds(10);
+      setGameStatus(STAGES.PREDICT);
+    } else if (gameStatus === STAGES.JOKER) {
+      interval = setInterval(() => setSeconds((seconds) => seconds - 1), 1000);
+    }
+    return () => clearInterval(interval);
+  }, [gameStatus, seconds]);
 
   function checkHandSizes() {
     const { hand1, hand2, hand3 } = hands;
@@ -77,12 +104,22 @@ function Game(props) {
     if (!checkHandSizes()) {
       setError(SIZE_ERR);
     } else {
-      submitHands(roomId, name, hands, () => {
-        setGameStatus(STAGES.SUBMIT);
-        socket.emit("action", {
-          type: "SUBMIT_HANDS",
-          payload: { name },
-        });
+      submitHands(roomId, name, hands, (data) => {
+        // check if all players submitted
+        let allSubmitted = true;
+        for (let i = 0; i < data.users.length; i++) {
+          const key = `player_${i + 1}`;
+          if (!data[key].submitted) allSubmitted = false;
+        }
+
+        if (!allSubmitted) {
+          setGameStatus(STAGES.SUBMIT);
+        } else {
+          socket.emit("action", {
+            type: "ALL_SUBMITTED",
+            payload: { roomId },
+          });
+        }
       });
     }
   }
@@ -187,6 +224,31 @@ function Game(props) {
       bottomDiv = <div>Waiting for other players...</div>;
       break;
     case STAGES.JOKER:
+      bottomDiv = (
+        <Grid container direction="column" alignItems="center" spacing={1}>
+          <Grid item xs={12}>
+            Time remaining: {seconds} sec
+          </Grid>
+          <Grid item xs={12}>
+            Use a joker this round?
+            <ToggleButtonGroup
+              classes={{ root: classes.toggleButtonGroup }}
+              color="primary"
+              value={joker}
+              exclusive
+              onChange={updateJoker}
+            >
+              <ToggleButton color="primary" value={true}>
+                Yes
+              </ToggleButton>
+              <ToggleButton color="primary" value={false}>
+                No
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+        </Grid>
+      );
+      break;
     case STAGES.PREDICT:
     case STAGES.RESULT:
     case STAGES.END:

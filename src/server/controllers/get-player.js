@@ -2,8 +2,8 @@ const Game = require("../models/game-model");
 const _ = require("lodash");
 
 module.exports = (req, res, next) => {
-  const gameId = req.body.gameId;
-  const playerName = req.body.playerName;
+  const gameId = req.query.gameId;
+  const playerName = req.query.playerName;
 
   Game.model.findOne({ gameId }, (err, game) => {
     if (err) return next(err);

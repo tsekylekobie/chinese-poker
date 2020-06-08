@@ -57,9 +57,7 @@ function Hand(props) {
       onDrop={onDrop}
       onDragOver={onDragOver}
     >
-      {children.map((card) => (
-        <Card key={card.name} data={card} />
-      ))}
+      {children && children.map((card) => <Card key={card.name} data={card} />)}
     </Grid>
   );
 }

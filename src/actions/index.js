@@ -3,7 +3,12 @@ import { generate } from "shortid";
 
 export function getPlayer(gameId, name, callback) {
   axios
-    .post("/api/get-player", { gameId, playerName: name.toLowerCase() })
+    .get("/api/get-player", {
+      params: {
+        gameId,
+        playerName: name.toLowerCase(),
+      },
+    })
     .then((res) => {
       if (res.status === 200) {
         callback(res.data);
@@ -16,17 +21,22 @@ export function getPlayer(gameId, name, callback) {
 }
 
 export function getGame(gameId, callback) {
-  axios.post("/api/get-game", { gameId }).then((res) => {
-    if (res.status === 200) {
-      callback(res.data);
-    }
-    return res;
-  });
+  axios
+    .get("/api/get-game", {
+      params: {
+        gameId,
+      },
+    })
+    .then((res) => {
+      if (res.status === 200) {
+        callback(res.data);
+      }
+      return res;
+    });
 }
 
 export function createGame(name, callback) {
   const gameId = generate();
-
   axios
     .post("/api/create-game", {
       gameId,
