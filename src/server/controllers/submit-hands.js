@@ -18,9 +18,10 @@ module.exports = (req, res, next) => {
           error: `Player ${playerName} does not exist in game ${gameId}`,
         });
 
-      Game.model.findOne({ gameId, users: playerName }, (err, game) => {
+      Game.model.findOne({ gameId, names: playerName }, (err, game) => {
         if (err) return next(err);
-        game[player.player] = player;
+        const index = _.findIndex(game.names, (u) => _.isEqual(u, playerName));
+        game.players[index] = player;
         game.save();
         res.json(game);
       });

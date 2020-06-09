@@ -137,9 +137,8 @@ function Game(props) {
       submitHands(roomId, name, hands, (data) => {
         // check if all players submitted
         let allSubmitted = true;
-        for (let i = 0; i < data.users.length; i++) {
-          const key = `player_${i + 1}`;
-          if (!data[key].submitted) allSubmitted = false;
+        for (let i = 0; i < data.names.length; i++) {
+          if (!data.players[i].submitted) allSubmitted = false;
         }
 
         if (!allSubmitted) {
@@ -336,8 +335,8 @@ function Game(props) {
   }
 
   const startingPlayer =
-    metadata.users && metadata.users.length > 0
-      ? metadata.users[(metadata.round - 1) % metadata.users.length]
+    metadata.names && metadata.names.length > 0
+      ? metadata.names[(metadata.round - 1) % metadata.names.length]
       : "";
 
   return (

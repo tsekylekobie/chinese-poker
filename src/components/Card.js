@@ -29,7 +29,8 @@ function Card(props) {
     toggleHighlight,
   } = useContext(CardsContext);
   const { handName, data } = props;
-  const { name } = data;
+  let { name } = data;
+  if (name.startsWith("10")) name = name.substring(1);
 
   const onDragStart = (e) => {
     e.dataTransfer.setData("text", JSON.stringify(data));

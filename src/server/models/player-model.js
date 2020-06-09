@@ -7,8 +7,8 @@ const Card = require("./card-model");
 const playerSchema = new Schema({
   gameId: String,
   playerName: { type: String, lowercase: true },
-  player: String,
   score: Number,
+  jokersRemaining: Number,
   submitted: Boolean,
   hand: [Card.schema],
   hand1: [Card.schema],

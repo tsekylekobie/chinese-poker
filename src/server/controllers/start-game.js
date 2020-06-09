@@ -36,22 +36,21 @@ module.exports = (req, res, next) => {
       }
       const newDeck = new Deck(cards).shuffle();
 
-      // Distribute cards to users
-      for (let i = 0; i < existingGame.users.length; i++) {
+      // Distribute cards and create players
+      for (let i = 0; i < existingGame.names.length; i++) {
         const player = new Player.model({
           gameId,
-          playerName: existingGame.users[i],
-          player: `player_${i + 1}`,
+          playerName: existingGame.names[i],
           score: 0,
+          jokersRemaining: 3,
           submitted: false,
           hand: newDeck.draw(13),
         });
         player.save();
-        existingGame[player.player] = player;
+        existingGame.players[i] = player;
       }
 
       existingGame.round += 1;
-
       existingGame.save();
       res.json(existingGame);
     }

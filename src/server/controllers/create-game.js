@@ -13,7 +13,7 @@ module.exports = (req, res, next) => {
 
     const newGame = new Game.model({
       gameId,
-      users: creator,
+      names: creator,
       gameStatus: STAGES.WAIT,
       round: 0,
     });

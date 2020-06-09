@@ -7,13 +7,10 @@ const Player = require("./player-model");
 const gameSchema = new Schema(
   {
     gameId: { type: String, unique: true },
-    users: [String],
+    names: [String],
     gameStatus: Number,
     round: Number,
-    player_1: Player.schema,
-    player_2: Player.schema,
-    player_3: Player.schema,
-    player_4: Player.schema,
+    players: [Player.schema],
   },
   { timestamps: true }
 );

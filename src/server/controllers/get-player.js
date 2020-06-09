@@ -9,13 +9,12 @@ module.exports = (req, res, next) => {
     if (err) return next(err);
     if (!game) return res.status(422).send({ error: "Game does not exist" });
 
-    const index = _.findIndex(game.users, (u) => _.isEqual(u, playerName));
+    const index = _.findIndex(game.names, (u) => _.isEqual(u, playerName));
     if (index === -1)
       return res
         .status(422)
         .send({ error: `Player ${playerName} is not in the game` });
 
-    const key = `player_${index + 1}`;
-    res.json(game[key]);
+    res.json(game.players[index]);
   });
 };

@@ -11,11 +11,11 @@ module.exports = (req, res, next) => {
 
     if (!existingGame) {
       res.json({ error: "Invalid GameID" });
-    } else if (existingGame.users.length < 4) {
-      if (!existingGame.users.includes(userJoined)) {
+    } else if (existingGame.names.length < 4) {
+      if (!existingGame.names.includes(userJoined)) {
         Game.model.findOneAndUpdate(
           { gameId },
-          { $addToSet: { users: userJoined } },
+          { $addToSet: { names: userJoined } },
           { new: true },
           (err, newGame) => {
             if (err) {
