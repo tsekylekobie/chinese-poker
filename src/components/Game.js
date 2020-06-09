@@ -1,16 +1,28 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
-import { Container, Grid, Button } from "@material-ui/core";
+import {
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+  Paper,
+  Container,
+  Grid,
+  Button,
+  Snackbar,
+} from "@material-ui/core";
 import { Alert, ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
 import Hand from "./Hand";
 import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
-import { STAGES } from "../common/constants";
+import { RANKS, SUITS, STAGES } from "../common/constants";
 
 // Error messages
 const SIZE_ERR = "Invalid hand size";
+
+const INIT_SECONDS = 20;
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -18,7 +30,7 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
   },
   control: {
-    padding: theme.spacing(1),
+    margin: theme.spacing(1),
   },
   button: {
     margin: theme.spacing(1),
@@ -28,6 +40,9 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.primary.main,
     borderRadius: 20,
   },
+  card: {
+    padding: theme.spacing(2),
+  },
 }));
 
 export const CardsContext = createContext();
@@ -36,18 +51,28 @@ function Game(props) {
   const classes = useStyles();
   const { socket, name } = useContext(AppContext);
 
-  const roomId = props.match.params.roomID;
+  // For displaying errors
   const [error, setError] = useState("");
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setError("");
+  };
+
+  const roomId = props.match.params.roomID;
   const [gameStatus, setGameStatus] = useState(STAGES.WAIT);
+  const [metadata, setMetadata] = useState({});
   const [hands, setHands] = useState({
     hand1: [],
     hand2: [],
     hand3: [],
     myHand: [],
   });
+
+  // State variables for joker stage
   const [joker, setJoker] = useState(false);
-  const [seconds, setSeconds] = useState(10);
+  const [seconds, setSeconds] = useState(INIT_SECONDS);
   const [highlight, toggleHighlight] = useState("");
+  const [newCard, setNewCard] = useState({ suit: SUITS[0], rank: RANKS[0] });
 
   const updateJoker = (_, newStatus) => {
     if (newStatus !== null) setJoker(newStatus);
@@ -61,20 +86,25 @@ function Game(props) {
       }));
     });
 
+  // On component mount
   useEffect(function getGameInfo() {
     getGame(roomId, (data) => {
-      // If the game has started, then go to the appropriate stage
+      setMetadata(data);
       if (data.gameStatus !== STAGES.WAIT) {
         setGameStatus(data.gameStatus);
+      }
+      if (data.gameStatus === STAGES.PLAY) {
         fetchHand();
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Set up websocket listeners
   useEffect(() => {
-    socket.on("START_GAME", () => {
+    socket.on("START_GAME", (data) => {
       setGameStatus(STAGES.PLAY);
+      setMetadata(data);
       fetchHand();
     });
     socket.on("ALL_SUBMITTED", () => {
@@ -87,8 +117,8 @@ function Game(props) {
     let interval = null;
     if (seconds === 0) {
       clearInterval(interval);
-      setSeconds(10);
-      // setGameStatus(STAGES.PREDICT);
+      setSeconds(INIT_SECONDS);
+      setGameStatus(STAGES.PREDICT);
     } else if (gameStatus === STAGES.JOKER) {
       interval = setInterval(() => setSeconds((seconds) => seconds - 1), 1000);
     }
@@ -125,12 +155,13 @@ function Game(props) {
   }
 
   function startGameHandler() {
-    startGame(roomId, () =>
+    startGame(roomId, (data) => {
+      setMetadata(data);
       socket.emit("action", {
         type: "START_GAME",
-        payload: { roomId },
-      })
-    );
+        payload: { roomId, data },
+      });
+    });
   }
 
   // For testing purposes
@@ -156,7 +187,7 @@ function Game(props) {
         case "K":
           return 13;
         case "A":
-          return 1;
+          return 14;
         default:
           return parseInt(card.name[0]);
       }
@@ -175,7 +206,7 @@ function Game(props) {
     }));
   }
 
-  let bottomDiv;
+  let leftDiv, bottomDiv;
   switch (gameStatus) {
     case STAGES.WAIT:
       bottomDiv = (
@@ -224,6 +255,50 @@ function Game(props) {
       bottomDiv = <div>Waiting for other players...</div>;
       break;
     case STAGES.JOKER:
+      if (highlight)
+        leftDiv = (
+          <Paper className={classes.card}>
+            <Grid container direction="row">
+              <Grid container item xs={6} direction="column">
+                <span>Replace with:</span>
+                <FormControl className={classes.control}>
+                  <InputLabel>Rank</InputLabel>
+                  <Select
+                    value={newCard.rank}
+                    onChange={(e) =>
+                      setNewCard({ suit: newCard.suit, rank: e.target.value })
+                    }
+                  >
+                    {RANKS.map((r) => {
+                      if (r === "0") return <MenuItem value={r}>10</MenuItem>;
+                      return <MenuItem value={r}>{r}</MenuItem>;
+                    })}
+                  </Select>
+                </FormControl>
+                <FormControl className={classes.control}>
+                  <InputLabel>Suit</InputLabel>
+                  <Select
+                    value={newCard.suit}
+                    onChange={(e) =>
+                      setNewCard({ rank: newCard.rank, suit: e.target.value })
+                    }
+                  >
+                    {SUITS.map((s) => (
+                      <MenuItem value={s}>{s}</MenuItem>
+                    ))}
+                  </Select>
+                </FormControl>
+              </Grid>
+              <Grid container item xs={6} justify="center" alignItems="center">
+                <img
+                  alt={newCard.rank + newCard.suit}
+                  src={`/images/${newCard.rank + newCard.suit[0]}.png`}
+                  height="100"
+                />
+              </Grid>
+            </Grid>
+          </Paper>
+        );
       bottomDiv = (
         <Grid container direction="column" alignItems="center" spacing={1}>
           <Grid item xs={12}>
@@ -247,7 +322,7 @@ function Game(props) {
             </ToggleButtonGroup>
           </Grid>
           <Grid item xs={12} style={{ fontSize: 12 }}>
-            If yes, click the card you want to change.
+            To use the joker, select 'Yes' and the card you want to change.
           </Grid>
         </Grid>
       );
@@ -256,21 +331,70 @@ function Game(props) {
     case STAGES.RESULT:
     case STAGES.END:
     default:
+      leftDiv = <div />;
       bottomDiv = <div />;
   }
+
+  const startingPlayer =
+    metadata.users && metadata.users.length > 0
+      ? metadata.users[(metadata.round - 1) % metadata.users.length]
+      : "";
 
   return (
     <Container className={classes.root}>
       <Grid container direction="column" justify="center" alignItems="center">
-        {error && <Alert severity="error">{error}</Alert>}
-        <Button onClick={autoSetHands}>Set hands</Button>
-        <CardsContext.Provider
-          value={{ hands, setHands, gameStatus, highlight, toggleHighlight }}
+        <Grid
+          container
+          item
+          direction="row"
+          justify="center"
+          alignItems="flex-start"
         >
-          <Hand name={"hand1"}>{hands.hand1}</Hand>
-          <Hand name={"hand2"}>{hands.hand2}</Hand>
-          <Hand name={"hand3"}>{hands.hand3}</Hand>
-        </CardsContext.Provider>
+          <Grid container item xs={3} direction="column">
+            <p>
+              <b>Round: </b> {metadata.round}
+              <br />
+              <b>Starting player:</b> {startingPlayer}
+            </p>
+            {leftDiv}
+          </Grid>
+          <Grid
+            container
+            item
+            xs={6}
+            direction="column"
+            justify="center"
+            alignItems="center"
+          >
+            {error && (
+              <Snackbar
+                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+                open={error.length > 0}
+                autoHideDuration={5000}
+                onClose={handleClose}
+              >
+                <Alert onClose={handleClose} severity="error">
+                  {error}
+                </Alert>
+              </Snackbar>
+            )}
+            <Button onClick={autoSetHands}>Set hands</Button>
+            <CardsContext.Provider
+              value={{
+                hands,
+                setHands,
+                gameStatus,
+                highlight,
+                toggleHighlight,
+              }}
+            >
+              <Hand name={"hand1"}>{hands.hand1}</Hand>
+              <Hand name={"hand2"}>{hands.hand2}</Hand>
+              <Hand name={"hand3"}>{hands.hand3}</Hand>
+            </CardsContext.Provider>
+          </Grid>
+          <Grid container item xs={3}></Grid>
+        </Grid>
         <Grid
           container
           className={classes.control}

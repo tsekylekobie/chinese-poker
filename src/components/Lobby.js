@@ -1,6 +1,12 @@
 import React, { useState, useContext } from "react";
 import { makeStyles } from "@material-ui/core/styles";
-import { Container, Grid, Button, TextField } from "@material-ui/core";
+import {
+  Container,
+  Grid,
+  Button,
+  TextField,
+  Snackbar,
+} from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
@@ -27,7 +33,13 @@ function Lobby(props) {
   const classes = useStyles();
   const { socket, name } = useContext(AppContext);
 
+  // For displaying errors
   const [error, setError] = useState("");
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setError("");
+  };
+
   const [gameId, setGameId] = useState("");
 
   function onSuccess(data) {
@@ -63,7 +75,21 @@ function Lobby(props) {
   return (
     <Container className={classes.root}>
       <Grid container direction="column" justify="center" alignItems="center">
-        {error && <Alert severity="error">{error}</Alert>}
+        {error && (
+          <Snackbar
+            anchorOrigin={{
+              vertical: "bottom",
+              horizontal: "left",
+            }}
+            open={error.length > 0}
+            autoHideDuration={5000}
+            onClose={handleClose}
+          >
+            <Alert onClose={handleClose} severity="error">
+              {error}
+            </Alert>
+          </Snackbar>
+        )}
         <Grid
           container
           className={classes.control}

@@ -28,12 +28,12 @@ function Hand(props) {
   switch (name) {
     case "hand1":
       classes = "hand three";
-      xs = 3;
+      xs = 7;
       break;
     case "hand2":
     case "hand3":
       classes = "hand five";
-      xs = 5;
+      xs = 10;
       break;
     default:
       classes = "hand";

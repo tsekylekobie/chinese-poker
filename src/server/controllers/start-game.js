@@ -29,7 +29,7 @@ module.exports = (req, res, next) => {
             new Card.model({
               name: RANKS[i] + SUITS[j][0],
               suit: SUITS[j],
-              value: RANKS === "0" ? "10" : RANKS[i],
+              value: RANKS[i],
             })
           );
         }
@@ -49,6 +49,8 @@ module.exports = (req, res, next) => {
         player.save();
         existingGame[player.player] = player;
       }
+
+      existingGame.round += 1;
 
       existingGame.save();
       res.json(existingGame);
