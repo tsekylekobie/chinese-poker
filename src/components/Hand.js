@@ -3,7 +3,7 @@ import { Grid } from "@material-ui/core";
 import _ from "lodash";
 
 import { removeCard } from "../common/helper";
-import { CardsContext } from "./Game";
+import { CardsContext } from "../containers/Game";
 import Card from "./Card";
 
 function Hand(props) {

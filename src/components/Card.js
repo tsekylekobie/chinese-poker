@@ -3,7 +3,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 
 import { removeCard } from "../common/helper";
-import { CardsContext } from "./Game";
+import { CardsContext } from "../containers/Game";
 import { STAGES } from "../common/constants";
 
 const useStyles = makeStyles((theme) => ({

@@ -1,25 +1,13 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
 import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
-import {
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
-  Paper,
-  Container,
-  Grid,
-  Button,
-  Snackbar,
-  Typography,
-  Switch,
-  FormControlLabel,
-} from "@material-ui/core";
+import { Container, Grid, Button, Snackbar } from "@material-ui/core";
 import { Alert, ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
-import Hand from "./Hand";
-import Table from "./Table";
+import Hand from "../components/Hand";
+import RightSidebar from "../components/RightSidebar";
+import LeftSidebar from "../components/LeftSidebar";
 import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
 import { RANKS, SUITS, STAGES } from "../common/constants";
 
@@ -45,9 +33,6 @@ const useStyles = makeStyles((theme) => ({
     color: theme.palette.primary.main,
     borderRadius: 20,
   },
-  card: {
-    padding: theme.spacing(2),
-  },
 }));
 
 export const CardsContext = createContext();
@@ -72,9 +57,6 @@ function Game(props) {
     if (reason === "clickaway") return;
     setError("");
   };
-
-  // For right column info
-  const [showHistory, setShowHistory] = useState(false);
 
   // State variables for joker stage
   const [joker, setJoker] = useState(false);
@@ -213,7 +195,7 @@ function Game(props) {
     }));
   }
 
-  let leftDiv, bottomDiv;
+  let bottomDiv;
   switch (gameStatus) {
     case STAGES.WAIT:
       bottomDiv = (
@@ -262,50 +244,6 @@ function Game(props) {
       bottomDiv = <div>Waiting for other players...</div>;
       break;
     case STAGES.JOKER:
-      if (highlight)
-        leftDiv = (
-          <Paper className={classes.card}>
-            <Grid container direction="row">
-              <Grid container item xs={6} direction="column">
-                <span>Replace with:</span>
-                <FormControl className={classes.control}>
-                  <InputLabel>Rank</InputLabel>
-                  <Select
-                    value={newCard.rank}
-                    onChange={(e) =>
-                      setNewCard({ suit: newCard.suit, rank: e.target.value })
-                    }
-                  >
-                    {RANKS.map((r) => {
-                      if (r === "0") return <MenuItem value={r}>10</MenuItem>;
-                      return <MenuItem value={r}>{r}</MenuItem>;
-                    })}
-                  </Select>
-                </FormControl>
-                <FormControl className={classes.control}>
-                  <InputLabel>Suit</InputLabel>
-                  <Select
-                    value={newCard.suit}
-                    onChange={(e) =>
-                      setNewCard({ rank: newCard.rank, suit: e.target.value })
-                    }
-                  >
-                    {SUITS.map((s) => (
-                      <MenuItem value={s}>{s}</MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid container item xs={6} justify="center" alignItems="center">
-                <img
-                  alt={newCard.rank + newCard.suit}
-                  src={`/images/${newCard.rank + newCard.suit[0]}.png`}
-                  height="100"
-                />
-              </Grid>
-            </Grid>
-          </Paper>
-        );
       bottomDiv = (
         <Grid container direction="column" alignItems="center" spacing={1}>
           <Grid item xs={12}>
@@ -338,101 +276,75 @@ function Game(props) {
     case STAGES.RESULT:
     case STAGES.END:
     default:
-      leftDiv = <div />;
       bottomDiv = <div />;
   }
 
-  const startingPlayer =
-    metadata.names && metadata.names.length > 0
-      ? metadata.names[(metadata.round - 1) % metadata.names.length]
-      : "";
-
   return (
-    <Container className={classes.root}>
-      <Grid container direction="column" justify="center" alignItems="center">
-        <Grid
-          container
-          item
-          direction="row"
-          justify="center"
-          alignItems="flex-start"
+    <CardsContext.Provider
+      value={{
+        metadata,
+        hands,
+        setHands,
+        gameStatus,
+        highlight,
+        toggleHighlight,
+        newCard,
+        setNewCard,
+      }}
+    >
+      {error && (
+        <Snackbar
+          anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+          open={error.length > 0}
+          autoHideDuration={5000}
+          onClose={handleClose}
         >
-          <Grid container item xs={3} direction="column">
-            <Typography variant="subtitle1">
-              <b>Round:</b>&nbsp;{metadata.round}
-            </Typography>
-            <Typography variant="subtitle1">
-              <b>Starting player:</b>&nbsp;{startingPlayer}
-            </Typography>
-            {leftDiv}
-          </Grid>
+          <Alert onClose={handleClose} severity="error">
+            {error}
+          </Alert>
+        </Snackbar>
+      )}
+      <Container className={classes.root}>
+        <Grid container direction="column" justify="center" alignItems="center">
           <Grid
             container
             item
-            xs={6}
-            direction="column"
+            direction="row"
             justify="center"
-            alignItems="center"
+            alignItems="flex-start"
           >
-            {error && (
-              <Snackbar
-                anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
-                open={error.length > 0}
-                autoHideDuration={5000}
-                onClose={handleClose}
-              >
-                <Alert onClose={handleClose} severity="error">
-                  {error}
-                </Alert>
-              </Snackbar>
-            )}
-            <Button onClick={autoSetHands}>Set hands</Button>
-            <CardsContext.Provider
-              value={{
-                hands,
-                setHands,
-                gameStatus,
-                highlight,
-                toggleHighlight,
-              }}
+            <Grid container item xs={3} direction="column">
+              <LeftSidebar />
+            </Grid>
+            <Grid
+              container
+              item
+              xs={6}
+              direction="column"
+              justify="center"
+              alignItems="center"
             >
+              <Button onClick={autoSetHands}>Set hands</Button>
               <Hand name={"hand1"}>{hands.hand1}</Hand>
               <Hand name={"hand2"}>{hands.hand2}</Hand>
               <Hand name={"hand3"}>{hands.hand3}</Hand>
-            </CardsContext.Provider>
+            </Grid>
+            <Grid container item xs={3}>
+              <RightSidebar />
+            </Grid>
           </Grid>
-          <Grid container item xs={3}>
-            <Typography variant="h6">Overall</Typography>
-            <Table data={metadata} />
-            <Typography variant="h6" style={{ marginTop: 16 }}>
-              Current Round
-            </Typography>
-            <Table data={metadata} />
-            <FormControlLabel
-              control={
-                <Switch
-                  checked={showHistory}
-                  onChange={() => setShowHistory(!showHistory)}
-                  color="primary"
-                />
-              }
-              label="View past rounds"
-              style={{ marginTop: 16 }}
-            />
-            {showHistory && <Table data={metadata} />}
+          <Grid
+            container
+            className={classes.control}
+            direction="row"
+            justify="center"
+            alignItems="center"
+          >
+            {bottomDiv}
           </Grid>
         </Grid>
-        <Grid
-          container
-          className={classes.control}
-          direction="row"
-          justify="center"
-          alignItems="center"
-        >
-          {bottomDiv}
-        </Grid>
-      </Grid>
-    </Container>
+      </Container>
+    </CardsContext.Provider>
   );
 }
 

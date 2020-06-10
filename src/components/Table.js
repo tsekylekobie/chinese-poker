@@ -42,7 +42,6 @@ const rows = [
 function Table(props) {
   const classes = useStyles();
   const { data } = props;
-  console.log(data);
 
   return (
     <TableContainer component={Paper}>
@@ -51,8 +50,8 @@ function Table(props) {
           <TableRow>
             <StyledTableCell className={classes.head} />
             {data.names &&
-              data.names.map((name) => (
-                <React.Fragment>
+              data.names.map((name, i) => (
+                <React.Fragment key={i}>
                   <StyledTableCell className={classes.head} align="center">
                     kyle
                   </StyledTableCell>

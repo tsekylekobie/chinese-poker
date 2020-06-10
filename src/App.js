@@ -10,8 +10,8 @@ import {
 import { AppBar, Toolbar, Typography, Button } from "@material-ui/core";
 import EditIcon from "@material-ui/icons/Edit";
 
-import Lobby from "./components/Lobby";
-import Game from "./components/Game";
+import Lobby from "./containers/Lobby";
+import Game from "./containers/Game";
 import "./App.css";
 
 const ENDPOINT = "http://localhost:8080";
