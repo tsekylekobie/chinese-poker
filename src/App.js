@@ -36,6 +36,7 @@ const theme = createMuiTheme({
     },
     secondary: {
       main: "#03DAC6", // teal
+      faded: "rgba(3, 218, 198, 0.4)",
     },
     error: {
       main: "#B00020", // red

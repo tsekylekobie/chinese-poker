@@ -11,11 +11,15 @@ import {
   Grid,
   Button,
   Snackbar,
+  Typography,
+  Switch,
+  FormControlLabel,
 } from "@material-ui/core";
 import { Alert, ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
 import Hand from "./Hand";
+import Table from "./Table";
 import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
 import { RANKS, SUITS, STAGES } from "../common/constants";
 
@@ -28,6 +32,7 @@ const useStyles = makeStyles((theme) => ({
   root: {
     flexGrow: 1,
     padding: theme.spacing(4),
+    maxWidth: "none",
   },
   control: {
     margin: theme.spacing(1),
@@ -51,13 +56,6 @@ function Game(props) {
   const classes = useStyles();
   const { socket, name } = useContext(AppContext);
 
-  // For displaying errors
-  const [error, setError] = useState("");
-  const handleClose = (event, reason) => {
-    if (reason === "clickaway") return;
-    setError("");
-  };
-
   const roomId = props.match.params.roomID;
   const [gameStatus, setGameStatus] = useState(STAGES.WAIT);
   const [metadata, setMetadata] = useState({});
@@ -67,6 +65,16 @@ function Game(props) {
     hand3: [],
     myHand: [],
   });
+
+  // For displaying errors
+  const [error, setError] = useState("");
+  const handleClose = (event, reason) => {
+    if (reason === "clickaway") return;
+    setError("");
+  };
+
+  // For right column info
+  const [showHistory, setShowHistory] = useState(false);
 
   // State variables for joker stage
   const [joker, setJoker] = useState(false);
@@ -350,11 +358,12 @@ function Game(props) {
           alignItems="flex-start"
         >
           <Grid container item xs={3} direction="column">
-            <p>
-              <b>Round: </b> {metadata.round}
-              <br />
-              <b>Starting player:</b> {startingPlayer}
-            </p>
+            <Typography variant="subtitle1">
+              <b>Round:</b>&nbsp;{metadata.round}
+            </Typography>
+            <Typography variant="subtitle1">
+              <b>Starting player:</b>&nbsp;{startingPlayer}
+            </Typography>
             {leftDiv}
           </Grid>
           <Grid
@@ -392,7 +401,26 @@ function Game(props) {
               <Hand name={"hand3"}>{hands.hand3}</Hand>
             </CardsContext.Provider>
           </Grid>
-          <Grid container item xs={3}></Grid>
+          <Grid container item xs={3}>
+            <Typography variant="h6">Overall</Typography>
+            <Table data={metadata} />
+            <Typography variant="h6" style={{ marginTop: 16 }}>
+              Current Round
+            </Typography>
+            <Table data={metadata} />
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={showHistory}
+                  onChange={() => setShowHistory(!showHistory)}
+                  color="primary"
+                />
+              }
+              label="View past rounds"
+              style={{ marginTop: 16 }}
+            />
+            {showHistory && <Table data={metadata} />}
+          </Grid>
         </Grid>
         <Grid
           container
