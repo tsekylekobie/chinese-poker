@@ -1,18 +1,15 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
-import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button, Snackbar } from "@material-ui/core";
-import { Alert, ToggleButtonGroup, ToggleButton } from "@material-ui/lab/";
+import { Alert } from "@material-ui/lab/";
 
 import { AppContext } from "../App";
 import Hand from "../components/Hand";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
+import BottomNav from "../components/BottomNav";
 import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
 import { RANKS, SUITS, STAGES } from "../common/constants";
-
-// Error messages
-const SIZE_ERR = "Invalid hand size";
 
 const INIT_SECONDS = 20;
 
@@ -24,14 +21,6 @@ const useStyles = makeStyles((theme) => ({
   },
   control: {
     margin: theme.spacing(1),
-  },
-  button: {
-    margin: theme.spacing(1),
-  },
-  toggleButtonGroup: {
-    padding: theme.spacing(1),
-    color: theme.palette.primary.main,
-    borderRadius: 20,
   },
 }));
 
@@ -59,14 +48,13 @@ function Game(props) {
   };
 
   // State variables for joker stage
-  const [joker, setJoker] = useState(false);
-  const [seconds, setSeconds] = useState(INIT_SECONDS);
-  const [highlight, toggleHighlight] = useState("");
-  const [newCard, setNewCard] = useState({ suit: SUITS[0], rank: RANKS[0] });
-
-  const updateJoker = (_, newStatus) => {
-    if (newStatus !== null) setJoker(newStatus);
+  const defaultJokerInfo = {
+    useJoker: false,
+    seconds: INIT_SECONDS,
+    highlight: "",
+    newCard: { suit: SUITS[0], rank: RANKS[0] },
   };
+  const [jokerInfo, setJokerInfo] = useState(defaultJokerInfo);
 
   const fetchHand = () =>
     getPlayer(roomId, name, (data) => {
@@ -105,15 +93,40 @@ function Game(props) {
 
   useEffect(() => {
     let interval = null;
-    if (seconds === 0) {
+    if (jokerInfo.seconds === 0) {
       clearInterval(interval);
-      setSeconds(INIT_SECONDS);
+      setJokerInfo((state) => ({ ...state, seconds: INIT_SECONDS }));
       setGameStatus(STAGES.PREDICT);
     } else if (gameStatus === STAGES.JOKER) {
-      interval = setInterval(() => setSeconds((seconds) => seconds - 1), 1000);
+      interval = setInterval(
+        () =>
+          setJokerInfo((state) => ({ ...state, seconds: state.seconds - 1 })),
+        1000
+      );
     }
     return () => clearInterval(interval);
-  }, [gameStatus, seconds]);
+  }, [gameStatus, jokerInfo]);
+
+  // For testing purposes
+  function autoSetHands() {
+    const { myHand } = hands;
+    setHands({
+      myHand: [],
+      hand1: myHand.slice(0, 3),
+      hand2: myHand.slice(3, 8),
+      hand3: myHand.slice(8, 13),
+    });
+  }
+
+  function startGameHandler() {
+    startGame(roomId, (data) => {
+      setMetadata(data);
+      socket.emit("action", {
+        type: "START_GAME",
+        payload: { roomId, data },
+      });
+    });
+  }
 
   function checkHandSizes() {
     const { hand1, hand2, hand3 } = hands;
@@ -122,7 +135,7 @@ function Game(props) {
 
   function submitCards() {
     if (!checkHandSizes()) {
-      setError(SIZE_ERR);
+      setError("Invalid hand size");
     } else {
       submitHands(roomId, name, hands, (data) => {
         // check if all players submitted
@@ -143,142 +156,6 @@ function Game(props) {
     }
   }
 
-  function startGameHandler() {
-    startGame(roomId, (data) => {
-      setMetadata(data);
-      socket.emit("action", {
-        type: "START_GAME",
-        payload: { roomId, data },
-      });
-    });
-  }
-
-  // For testing purposes
-  function autoSetHands() {
-    const { myHand } = hands;
-    setHands({
-      myHand: [],
-      hand1: myHand.slice(0, 3),
-      hand2: myHand.slice(3, 8),
-      hand3: myHand.slice(8, 13),
-    });
-  }
-
-  function sortByRank() {
-    const sort = (card) => {
-      switch (card.name[0]) {
-        case "0":
-          return 10;
-        case "J":
-          return 11;
-        case "Q":
-          return 12;
-        case "K":
-          return 13;
-        case "A":
-          return 14;
-        default:
-          return parseInt(card.name[0]);
-      }
-    };
-    setHands((state) => ({
-      ...state,
-      myHand: _.sortBy(state.myHand, sort),
-    }));
-  }
-
-  function sortBySuit() {
-    const sort = (card) => card.suit;
-    setHands((state) => ({
-      ...state,
-      myHand: _.sortBy(state.myHand, sort),
-    }));
-  }
-
-  let bottomDiv;
-  switch (gameStatus) {
-    case STAGES.WAIT:
-      bottomDiv = (
-        <Button
-          variant="contained"
-          className={classes.button}
-          color="primary"
-          onClick={startGameHandler}
-        >
-          Start
-        </Button>
-      );
-      break;
-    case STAGES.PLAY:
-      bottomDiv = (
-        <CardsContext.Provider value={{ hands, setHands, gameStatus }}>
-          <Hand name={"myHand"}>{hands.myHand}</Hand>
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="secondary"
-            onClick={sortByRank}
-          >
-            Sort by Rank
-          </Button>
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="secondary"
-            onClick={sortBySuit}
-          >
-            Sort by Suit
-          </Button>
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="primary"
-            onClick={submitCards}
-          >
-            Submit
-          </Button>
-        </CardsContext.Provider>
-      );
-      break;
-    case STAGES.SUBMIT:
-      bottomDiv = <div>Waiting for other players...</div>;
-      break;
-    case STAGES.JOKER:
-      bottomDiv = (
-        <Grid container direction="column" alignItems="center" spacing={1}>
-          <Grid item xs={12}>
-            <b>Time remaining:</b> {seconds} sec
-          </Grid>
-          <Grid item xs={12}>
-            Use a joker this round?
-            <ToggleButtonGroup
-              classes={{ root: classes.toggleButtonGroup }}
-              color="primary"
-              value={joker}
-              exclusive
-              onChange={updateJoker}
-            >
-              <ToggleButton color="primary" value={true}>
-                Yes
-              </ToggleButton>
-              <ToggleButton color="primary" value={false}>
-                No
-              </ToggleButton>
-            </ToggleButtonGroup>
-          </Grid>
-          <Grid item xs={12} style={{ fontSize: 12 }}>
-            To use the joker, select 'Yes' and the card you want to change.
-          </Grid>
-        </Grid>
-      );
-      break;
-    case STAGES.PREDICT:
-    case STAGES.RESULT:
-    case STAGES.END:
-    default:
-      bottomDiv = <div />;
-  }
-
   return (
     <CardsContext.Provider
       value={{
@@ -286,10 +163,10 @@ function Game(props) {
         hands,
         setHands,
         gameStatus,
-        highlight,
-        toggleHighlight,
-        newCard,
-        setNewCard,
+        jokerInfo,
+        setJokerInfo,
+        startGameHandler,
+        submitCards,
       }}
     >
       {error && (
@@ -340,7 +217,7 @@ function Game(props) {
             justify="center"
             alignItems="center"
           >
-            {bottomDiv}
+            <BottomNav />
           </Grid>
         </Grid>
       </Container>

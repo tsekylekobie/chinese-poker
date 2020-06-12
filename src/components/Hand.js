@@ -7,7 +7,7 @@ import { CardsContext } from "../containers/Game";
 import Card from "./Card";
 
 function Hand(props) {
-  const { hands, setHands } = useContext(CardsContext);
+  const { hands, setHands, jokerInfo } = useContext(CardsContext);
   const { children, name } = props;
 
   const onDrop = (e) => {
@@ -54,7 +54,12 @@ function Hand(props) {
     >
       {children &&
         children.map((card) => (
-          <Card key={card.name} data={card} handName={name} />
+          <Card
+            key={card.name}
+            data={card}
+            handName={name}
+            jokerInfo={jokerInfo}
+          />
         ))}
     </Grid>
   );

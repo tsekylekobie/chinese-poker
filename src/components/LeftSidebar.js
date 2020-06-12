@@ -21,9 +21,10 @@ const useStyles = makeStyles((theme) => ({
 
 function LeftSidebar() {
   const classes = useStyles();
-  const { gameStatus, newCard, setNewCard, highlight, metadata } = useContext(
+  const { gameStatus, jokerInfo, setJokerInfo, metadata } = useContext(
     CardsContext
   );
+  const { useJoker, highlight, newCard } = jokerInfo;
 
   const currRound = metadata && metadata.round;
   const startingPlayer =
@@ -40,7 +41,10 @@ function LeftSidebar() {
             <Select
               value={newCard.rank}
               onChange={(e) =>
-                setNewCard({ suit: newCard.suit, rank: e.target.value })
+                setJokerInfo((state) => ({
+                  ...state,
+                  newCard: { suit: newCard.suit, rank: e.target.value },
+                }))
               }
             >
               {RANKS.map((rank, i) => {
@@ -58,7 +62,10 @@ function LeftSidebar() {
             <Select
               value={newCard.suit}
               onChange={(e) =>
-                setNewCard({ rank: newCard.rank, suit: e.target.value })
+                setJokerInfo((state) => ({
+                  ...state,
+                  newCard: { rank: newCard.rank, suit: e.target.value },
+                }))
               }
             >
               {SUITS.map((suit, i) => (
@@ -88,7 +95,7 @@ function LeftSidebar() {
       <Typography variant="subtitle1">
         <b>Starting player:</b>&nbsp;{startingPlayer}
       </Typography>
-      {gameStatus === STAGES.JOKER && highlight && selectCardWindow}
+      {gameStatus === STAGES.JOKER && useJoker && highlight && selectCardWindow}
     </React.Fragment>
   );
 }

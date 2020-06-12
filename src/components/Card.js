@@ -21,13 +21,10 @@ const useStyles = makeStyles((theme) => ({
 
 function Card(props) {
   const classes = useStyles();
-  const {
-    hands,
-    setHands,
-    gameStatus,
-    highlight,
-    toggleHighlight,
-  } = useContext(CardsContext);
+  const { hands, setHands, gameStatus, jokerInfo, setJokerInfo } = useContext(
+    CardsContext
+  );
+
   const { handName, data } = props;
   let { name } = data;
   if (name.startsWith("10")) name = name.substring(1);
@@ -52,10 +49,11 @@ function Card(props) {
   };
 
   const onClick = () => {
-    if (highlight === name) {
-      toggleHighlight("");
+    if (!jokerInfo.useJoker) return;
+    if (jokerInfo.highlight === name) {
+      setJokerInfo((state) => ({ ...state, highlight: "" }));
     } else {
-      toggleHighlight(name);
+      setJokerInfo((state) => ({ ...state, highlight: name }));
     }
   };
 
@@ -67,7 +65,13 @@ function Card(props) {
       onDrop={onDrop}
       onClick={gameStatus === STAGES.JOKER ? onClick : null}
     >
-      <div className={highlight === name ? classes.highlighted : null}></div>
+      <div
+        className={
+          jokerInfo && jokerInfo.useJoker && jokerInfo.highlight === name
+            ? classes.highlighted
+            : null
+        }
+      ></div>
       <img alt={name} src={`/images/${name}.png`} height="100" />
     </div>
   );
