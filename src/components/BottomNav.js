@@ -27,9 +27,12 @@ function BottomNav() {
     gameStatus,
     jokerInfo,
     setJokerInfo,
+    prediction,
+    setPrediction,
     startGameHandler,
     submitCards,
     submitJokerInfo,
+    submitPredictInfo,
   } = useContext(CardsContext);
 
   function sortByRank() {
@@ -66,6 +69,10 @@ function BottomNav() {
   function updateJoker(_, newStatus) {
     if (newStatus !== null)
       setJokerInfo((state) => ({ ...state, useJoker: newStatus }));
+  }
+
+  function updatePrediction(_, newStatus) {
+    if (newStatus !== null) setPrediction(newStatus);
   }
 
   let bottomDiv;
@@ -153,6 +160,44 @@ function BottomNav() {
       );
       break;
     case STAGES.PREDICT:
+      bottomDiv = (
+        <Grid container direction="column" alignItems="center" spacing={1}>
+          <Grid item xs={12}>
+            How many hands will you win?
+            <ToggleButtonGroup
+              classes={{ root: classes.toggleButtonGroup }}
+              color="primary"
+              value={prediction}
+              exclusive
+              onChange={updatePrediction}
+            >
+              <ToggleButton color="primary" value={0}>
+                0
+              </ToggleButton>
+              <ToggleButton color="primary" value={1}>
+                1
+              </ToggleButton>
+              <ToggleButton color="primary" value={2}>
+                2
+              </ToggleButton>
+              <ToggleButton color="primary" value={3}>
+                3
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              className={classes.button}
+              color="primary"
+              onClick={submitPredictInfo}
+            >
+              Submit
+            </Button>
+          </Grid>
+        </Grid>
+      );
+      break;
     case STAGES.RESULT:
     case STAGES.END:
     default:

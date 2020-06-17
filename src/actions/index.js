@@ -116,3 +116,19 @@ export function submitJoker(gameId, name, hands, useJoker, callback) {
       throw error;
     });
 }
+
+export function submitPrediction(gameId, name, prediction, callback) {
+  axios
+    .post("/api/submit-prediction", {
+      gameId,
+      playerName: name.toLowerCase(),
+      prediction,
+    })
+    .then((res) => {
+      callback(res.data);
+      return res;
+    })
+    .catch((error) => {
+      throw error;
+    });
+}

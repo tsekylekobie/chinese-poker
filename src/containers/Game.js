@@ -15,6 +15,7 @@ import {
   getGame,
   submitHands,
   submitJoker,
+  submitPrediction,
 } from "../actions/index";
 import { STAGES } from "../common/constants";
 
@@ -63,6 +64,9 @@ function Game(props) {
     },
   };
   const [jokerInfo, setJokerInfo] = useState(defaultJokerInfo);
+
+  // State variables for prediction stage
+  const [prediction, setPrediction] = useState(0);
 
   const fetchHand = () =>
     getPlayer(roomId, name, (data) => {
@@ -158,7 +162,7 @@ function Game(props) {
     }
   }
 
-  // helper function for submitJoker
+  // helper function for submitJokerInfo
   function replaceCard(hand, jokerInfo) {
     let idx = _.findIndex(hand, { name: jokerInfo.highlight });
     if (idx === -1) return false;
@@ -195,6 +199,20 @@ function Game(props) {
     });
   }
 
+  function submitPredictInfo() {
+    submitPrediction(roomId, name, prediction, (data) => {
+      setMetadata(data);
+      if (data.gameStatus !== STAGES.RESULT) {
+        setGameStatus(STAGES.SUBMIT);
+      } else {
+        socket.emit("action", {
+          type: "TO_RESULTS_ROUND",
+          payload: { roomId },
+        });
+      }
+    });
+  }
+
   return (
     <CardsContext.Provider
       value={{
@@ -204,9 +222,12 @@ function Game(props) {
         gameStatus,
         jokerInfo,
         setJokerInfo,
+        prediction,
+        setPrediction,
         startGameHandler,
         submitCards,
         submitJokerInfo,
+        submitPredictInfo,
       }}
     >
       {error && (
