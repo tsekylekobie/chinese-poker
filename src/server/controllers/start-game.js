@@ -43,6 +43,8 @@ module.exports = (req, res, next) => {
           playerName: existingGame.names[i],
           score: 0,
           jokersRemaining: 3,
+          useJoker: false,
+          prediction: 0,
           submitted: false,
           hand: newDeck.draw(13),
         });

@@ -7,10 +7,11 @@ module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
   const playerName = req.body.playerName;
   const { hand, hand1, hand2, hand3 } = req.body.submitted;
+  const useJoker = req.body.useJoker;
 
   Player.model.findOneAndUpdate(
     { gameId, playerName: playerName },
-    { hand, hand1, hand2, hand3, submitted: true },
+    { hand, hand1, hand2, hand3, submitted: true, useJoker },
     { new: true },
     (err, player) => {
       if (err) return next(err);
@@ -29,9 +30,9 @@ module.exports = (req, res, next) => {
           if (!game.players[i].submitted) allSubmitted = false;
         }
 
-        // if all players submitted, then advance to joker round
+        // if all players submitted, then advance to prediction round
         if (allSubmitted) {
-          game.gameStatus = STAGES.JOKER;
+          game.gameStatus = STAGES.PREDICT;
           for (let i = 0; i < game.players.length; i++) {
             // reset flag so we can use for future rounds
             game.players[i].submitted = false;

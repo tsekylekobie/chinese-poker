@@ -33,7 +33,7 @@ function RightSidebar() {
     round = [
       createRowData(
         "Joker?",
-        metadata.players.map((p) => p.useJoker || "-")
+        metadata.players.map((p) => (p.useJoker ? "Y" : "N"))
       ),
       createRowData(
         "Prediction",

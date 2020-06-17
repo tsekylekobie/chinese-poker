@@ -61,8 +61,8 @@ function Card(props) {
     <div
       className={classes.root}
       draggable={gameStatus === STAGES.PLAY}
-      onDragStart={onDragStart}
-      onDrop={onDrop}
+      onDragStart={gameStatus === STAGES.PLAY ? onDragStart : null}
+      onDrop={gameStatus === STAGES.PLAY ? onDrop : null}
       onClick={gameStatus === STAGES.JOKER ? onClick : null}
     >
       <div

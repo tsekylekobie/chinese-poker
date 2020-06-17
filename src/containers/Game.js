@@ -9,7 +9,13 @@ import Hand from "../components/Hand";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import BottomNav from "../components/BottomNav";
-import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
+import {
+  startGame,
+  getPlayer,
+  getGame,
+  submitHands,
+  submitJoker,
+} from "../actions/index";
 import { STAGES } from "../common/constants";
 
 const useStyles = makeStyles((theme) => ({
@@ -94,13 +100,17 @@ function Game(props) {
       setMetadata(data);
       fetchHand();
     });
-    socket.on("ALL_SUBMITTED", () => {
+    socket.on("TO_JOKER_ROUND", () => {
       setGameStatus(STAGES.JOKER);
     });
+    socket.on("TO_PRED_ROUND", () => {
+      setGameStatus(STAGES.PREDICT);
+    });
+    socket.on("TO_RESULTS_ROUND", () => {
+      setGameStatus(STAGES.RESULT);
+    });
 
-    return () => {
-      socket.removeAllListeners();
-    };
+    return socket.removeAllListeners;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -135,18 +145,12 @@ function Game(props) {
       setError("Invalid hand size");
     } else {
       submitHands(roomId, name, hands, (data) => {
-        // TODO: do we need this here? just moved this to server
-        // check if all players submitted
-        let allSubmitted = true;
-        for (let i = 0; i < data.names.length; i++) {
-          if (!data.players[i].submitted) allSubmitted = false;
-        }
-
-        if (!allSubmitted) {
+        setMetadata(data);
+        if (data.gameStatus !== STAGES.JOKER) {
           setGameStatus(STAGES.SUBMIT);
         } else {
           socket.emit("action", {
-            type: "ALL_SUBMITTED",
+            type: "TO_JOKER_ROUND",
             payload: { roomId },
           });
         }
@@ -170,18 +174,24 @@ function Game(props) {
     return true;
   }
 
-  function submitJoker() {
-    if (jokerInfo.useJoker) {
+  function submitJokerInfo() {
+    const used = jokerInfo.highlight === "" ? false : jokerInfo.useJoker;
+    if (used) {
       // replace card in hand if not found yet
       replaceCard(hands.hand1, jokerInfo) ||
         replaceCard(hands.hand2, jokerInfo) ||
         replaceCard(hands.hand3, jokerInfo);
     }
-    console.log(hands);
-
-    socket.emit("action", {
-      type: "SUBMIT_JOKER",
-      payload: { roomId, hands, useJoker: jokerInfo.useJoker },
+    submitJoker(roomId, name, hands, used, (data) => {
+      setMetadata(data);
+      if (data.gameStatus !== STAGES.PREDICT) {
+        setGameStatus(STAGES.SUBMIT);
+      } else {
+        socket.emit("action", {
+          type: "TO_PRED_ROUND",
+          payload: { roomId },
+        });
+      }
     });
   }
 
@@ -196,7 +206,7 @@ function Game(props) {
         setJokerInfo,
         startGameHandler,
         submitCards,
-        submitJoker,
+        submitJokerInfo,
       }}
     >
       {error && (

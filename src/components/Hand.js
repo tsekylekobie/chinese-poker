@@ -5,9 +5,10 @@ import _ from "lodash";
 import { removeCard } from "../common/helper";
 import { CardsContext } from "../containers/Game";
 import Card from "./Card";
+import { STAGES } from "../common/constants";
 
 function Hand(props) {
-  const { hands, setHands, jokerInfo } = useContext(CardsContext);
+  const { hands, setHands, jokerInfo, gameStatus } = useContext(CardsContext);
   const { children, name } = props;
 
   const onDrop = (e) => {
@@ -49,8 +50,8 @@ function Hand(props) {
       justify="center"
       alignItems="center"
       xs={xs}
-      onDrop={onDrop}
-      onDragOver={onDragOver}
+      onDrop={gameStatus === STAGES.PLAY ? onDrop : null}
+      onDragOver={gameStatus === STAGES.PLAY ? onDragOver : null}
     >
       {children &&
         children.map((card) => (

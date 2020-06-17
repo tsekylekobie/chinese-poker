@@ -55,8 +55,10 @@ io.on("connection", function (socket) {
         console.log("starting", data.roomId);
         io.sockets.in(data.roomId).emit("START_GAME", data.data);
         break;
-      case "ALL_SUBMITTED":
-        io.sockets.in(data.roomId).emit("ALL_SUBMITTED");
+      case "TO_JOKER_ROUND":
+      case "TO_PRED_ROUND":
+      case "TO_RESULTS_ROUND":
+        io.sockets.in(data.roomId).emit(action.type);
         break;
       default:
         null;

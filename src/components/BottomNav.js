@@ -29,7 +29,7 @@ function BottomNav() {
     setJokerInfo,
     startGameHandler,
     submitCards,
-    submitJoker,
+    submitJokerInfo,
   } = useContext(CardsContext);
 
   function sortByRank() {
@@ -144,7 +144,7 @@ function BottomNav() {
               variant="contained"
               className={classes.button}
               color="primary"
-              onClick={submitJoker}
+              onClick={submitJokerInfo}
             >
               Submit
             </Button>

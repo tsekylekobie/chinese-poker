@@ -99,3 +99,20 @@ export function submitHands(gameId, name, hands, callback) {
       throw error;
     });
 }
+
+export function submitJoker(gameId, name, hands, useJoker, callback) {
+  axios
+    .post("/api/submit-joker", {
+      gameId,
+      playerName: name.toLowerCase(),
+      submitted: hands,
+      useJoker,
+    })
+    .then((res) => {
+      callback(res.data);
+      return res;
+    })
+    .catch((error) => {
+      throw error;
+    });
+}

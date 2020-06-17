@@ -4,6 +4,7 @@ const createGame = require("./controllers/create-game");
 const joinGame = require("./controllers/join-game");
 const startGame = require("./controllers/start-game");
 const submitHands = require("./controllers/submit-hands");
+const submitJoker = require("./controllers/submit-joker");
 
 module.exports = function router(app) {
   app.get("/api/get-player", getPlayer);
@@ -12,4 +13,5 @@ module.exports = function router(app) {
   app.post("/api/join-game", joinGame);
   app.post("/api/start-game", startGame);
   app.post("/api/submit-hands", submitHands);
+  app.post("/api/submit-joker", submitJoker);
 };
