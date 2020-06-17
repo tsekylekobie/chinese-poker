@@ -39,19 +39,23 @@ function LeftSidebar() {
           <FormControl className={classes.control}>
             <InputLabel>Rank</InputLabel>
             <Select
-              value={newCard.rank}
+              value={newCard.value}
               onChange={(e) =>
                 setJokerInfo((state) => ({
                   ...state,
-                  newCard: { suit: newCard.suit, rank: e.target.value },
+                  newCard: {
+                    suit: newCard.suit,
+                    value: e.target.value,
+                    name: `${e.target.value}${newCard.suit[0]}`,
+                  },
                 }))
               }
             >
               {RANKS.map((rank, i) => {
-                const val = rank === "0" ? 10 : rank;
+                const val = rank === "10" ? 0 : rank;
                 return (
-                  <MenuItem key={i} value={rank}>
-                    {val}
+                  <MenuItem key={i} value={val}>
+                    {rank}
                   </MenuItem>
                 );
               })}
@@ -64,7 +68,11 @@ function LeftSidebar() {
               onChange={(e) =>
                 setJokerInfo((state) => ({
                   ...state,
-                  newCard: { rank: newCard.rank, suit: e.target.value },
+                  newCard: {
+                    value: newCard.value,
+                    suit: e.target.value,
+                    name: `${newCard.rank}${e.target.value[0]}`,
+                  },
                 }))
               }
             >
@@ -79,7 +87,7 @@ function LeftSidebar() {
         <Grid container item xs={6} justify="center" alignItems="center">
           <img
             alt={newCard.rank + newCard.suit}
-            src={`/images/${newCard.rank + newCard.suit[0]}.png`}
+            src={`/images/${newCard.value + newCard.suit[0]}.png`}
             height="100"
           />
         </Grid>

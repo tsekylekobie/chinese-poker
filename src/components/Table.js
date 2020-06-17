@@ -30,18 +30,27 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-function createData(name, calories, fat, carbs, protein) {
-  return { name, calories, fat, carbs, protein };
+function displayRow(data, rowData) {
+  return (
+    <TableRow key={rowData.name}>
+      <StyledTableCell component="th" scope="row">
+        {rowData.name}
+      </StyledTableCell>
+      {data.names.map((_, i) => {
+        const key = `player_${i + 1}`;
+        return (
+          <StyledTableCell key={rowData.name + (i + 1)} align="center">
+            {rowData[key]}
+          </StyledTableCell>
+        );
+      })}
+    </TableRow>
+  );
 }
-
-const rows = [
-  createData("Jokers", 10, 10.5, 12.5, 13.5),
-  createData("Score", 3, 3, 2, 0),
-];
 
 function Table(props) {
   const classes = useStyles();
-  const { data } = props;
+  const { data, rows } = props;
 
   return (
     <TableContainer component={Paper}>
@@ -53,36 +62,13 @@ function Table(props) {
               data.names.map((name, i) => (
                 <React.Fragment key={i}>
                   <StyledTableCell className={classes.head} align="center">
-                    kyle
-                  </StyledTableCell>
-                  <StyledTableCell className={classes.head} align="center">
-                    kyndall
-                  </StyledTableCell>
-                  <StyledTableCell className={classes.head} align="center">
-                    terrance
-                  </StyledTableCell>
-                  <StyledTableCell className={classes.head} align="center">
-                    kenneth
+                    {name}
                   </StyledTableCell>
                 </React.Fragment>
               ))}
           </TableRow>
         </TableHead>
-        <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.name}>
-              <StyledTableCell component="th" scope="row">
-                {row.name}
-              </StyledTableCell>
-              <StyledTableCell align="center" className={classes.highlighted}>
-                {row.calories}
-              </StyledTableCell>
-              <StyledTableCell align="center">{row.fat}</StyledTableCell>
-              <StyledTableCell align="center">{row.carbs}</StyledTableCell>
-              <StyledTableCell align="center">{row.protein}</StyledTableCell>
-            </TableRow>
-          ))}
-        </TableBody>
+        <TableBody>{rows.map((row) => displayRow(data, row))}</TableBody>
       </MuiTable>
     </TableContainer>
   );

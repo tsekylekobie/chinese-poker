@@ -1,6 +1,7 @@
 const _ = require("lodash");
 const Game = require("../models/game-model");
 const Player = require("../models/player-model");
+const { STAGES } = require("../../common/constants");
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
@@ -22,6 +23,15 @@ module.exports = (req, res, next) => {
         if (err) return next(err);
         const index = _.findIndex(game.names, (u) => _.isEqual(u, playerName));
         game.players[index] = player;
+
+        // if all players submitted, then advance to joker round
+        let allSubmitted = true;
+        for (let i = 0; i < game.players.length; i++) {
+          if (!game.players[i].submitted) allSubmitted = false;
+        }
+
+        if (allSubmitted) game.gameStatus = STAGES.JOKER;
+
         game.save();
         res.json(game);
       });

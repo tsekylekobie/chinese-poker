@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from "react";
+import _ from "lodash";
 import { makeStyles } from "@material-ui/core/styles";
 import { Container, Grid, Button, Snackbar } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
@@ -9,9 +10,7 @@ import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import BottomNav from "../components/BottomNav";
 import { startGame, getPlayer, getGame, submitHands } from "../actions/index";
-import { RANKS, SUITS, STAGES } from "../common/constants";
-
-const INIT_SECONDS = 20;
+import { STAGES } from "../common/constants";
 
 const useStyles = makeStyles((theme) => ({
   root: {
@@ -50,9 +49,12 @@ function Game(props) {
   // State variables for joker stage
   const defaultJokerInfo = {
     useJoker: false,
-    seconds: INIT_SECONDS,
     highlight: "",
-    newCard: { suit: SUITS[0], rank: RANKS[0] },
+    newCard: {
+      suit: "Club",
+      value: "2",
+      name: "2C",
+    },
   };
   const [jokerInfo, setJokerInfo] = useState(defaultJokerInfo);
 
@@ -60,6 +62,9 @@ function Game(props) {
     getPlayer(roomId, name, (data) => {
       setHands((state) => ({
         ...state,
+        hand1: data.hand1,
+        hand2: data.hand2,
+        hand3: data.hand3,
         myHand: data.hand,
       }));
     });
@@ -68,11 +73,15 @@ function Game(props) {
   useEffect(function getGameInfo() {
     getGame(roomId, (data) => {
       setMetadata(data);
-      if (data.gameStatus !== STAGES.WAIT) {
-        setGameStatus(data.gameStatus);
-      }
-      if (data.gameStatus === STAGES.PLAY) {
-        fetchHand();
+      console.log("Game status", data.gameStatus); // for debugging
+      switch (data.gameStatus) {
+        case STAGES.WAIT:
+          break;
+        case STAGES.PLAY:
+        case STAGES.JOKER:
+          fetchHand();
+        default:
+          setGameStatus(data.gameStatus);
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -88,24 +97,12 @@ function Game(props) {
     socket.on("ALL_SUBMITTED", () => {
       setGameStatus(STAGES.JOKER);
     });
+
+    return () => {
+      socket.removeAllListeners();
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    let interval = null;
-    if (jokerInfo.seconds === 0) {
-      clearInterval(interval);
-      setJokerInfo((state) => ({ ...state, seconds: INIT_SECONDS }));
-      setGameStatus(STAGES.PREDICT);
-    } else if (gameStatus === STAGES.JOKER) {
-      interval = setInterval(
-        () =>
-          setJokerInfo((state) => ({ ...state, seconds: state.seconds - 1 })),
-        1000
-      );
-    }
-    return () => clearInterval(interval);
-  }, [gameStatus, jokerInfo]);
 
   // For testing purposes
   function autoSetHands() {
@@ -138,6 +135,7 @@ function Game(props) {
       setError("Invalid hand size");
     } else {
       submitHands(roomId, name, hands, (data) => {
+        // TODO: do we need this here? just moved this to server
         // check if all players submitted
         let allSubmitted = true;
         for (let i = 0; i < data.names.length; i++) {
@@ -156,6 +154,37 @@ function Game(props) {
     }
   }
 
+  // helper function for submitJoker
+  function replaceCard(hand, jokerInfo) {
+    let idx = _.findIndex(hand, { name: jokerInfo.highlight });
+    if (idx === -1) return false;
+
+    setHands((state) => ({
+      ...state,
+      hand1: [
+        ...hands.hand1.slice(0, idx),
+        jokerInfo.newCard,
+        ...hands.hand1.slice(idx + 1),
+      ],
+    }));
+    return true;
+  }
+
+  function submitJoker() {
+    if (jokerInfo.useJoker) {
+      // replace card in hand if not found yet
+      replaceCard(hands.hand1, jokerInfo) ||
+        replaceCard(hands.hand2, jokerInfo) ||
+        replaceCard(hands.hand3, jokerInfo);
+    }
+    console.log(hands);
+
+    socket.emit("action", {
+      type: "SUBMIT_JOKER",
+      payload: { roomId, hands, useJoker: jokerInfo.useJoker },
+    });
+  }
+
   return (
     <CardsContext.Provider
       value={{
@@ -167,6 +196,7 @@ function Game(props) {
         setJokerInfo,
         startGameHandler,
         submitCards,
+        submitJoker,
       }}
     >
       {error && (
@@ -207,7 +237,7 @@ function Game(props) {
               <Hand name={"hand3"}>{hands.hand3}</Hand>
             </Grid>
             <Grid container item xs={3}>
-              <RightSidebar />
+              {gameStatus !== STAGES.WAIT && <RightSidebar />}
             </Grid>
           </Grid>
           <Grid

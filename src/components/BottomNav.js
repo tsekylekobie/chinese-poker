@@ -29,6 +29,7 @@ function BottomNav() {
     setJokerInfo,
     startGameHandler,
     submitCards,
+    submitJoker,
   } = useContext(CardsContext);
 
   function sortByRank() {
@@ -119,9 +120,6 @@ function BottomNav() {
       bottomDiv = (
         <Grid container direction="column" alignItems="center" spacing={1}>
           <Grid item xs={12}>
-            <b>Time remaining:</b> {jokerInfo.seconds} sec
-          </Grid>
-          <Grid item xs={12}>
             Use a joker this round?
             <ToggleButtonGroup
               classes={{ root: classes.toggleButtonGroup }}
@@ -140,6 +138,16 @@ function BottomNav() {
           </Grid>
           <Grid item xs={12} style={{ fontSize: 12 }}>
             To use the joker, select 'Yes' and the card you want to change.
+          </Grid>
+          <Grid item xs={12}>
+            <Button
+              variant="contained"
+              className={classes.button}
+              color="primary"
+              onClick={submitJoker}
+            >
+              Submit
+            </Button>
           </Grid>
         </Grid>
       );
