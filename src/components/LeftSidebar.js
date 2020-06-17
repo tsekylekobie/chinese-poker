@@ -71,7 +71,7 @@ function LeftSidebar() {
                   newCard: {
                     value: newCard.value,
                     suit: e.target.value,
-                    name: `${newCard.rank}${e.target.value[0]}`,
+                    name: `${newCard.value}${e.target.value[0]}`,
                   },
                 }))
               }

@@ -55,6 +55,7 @@ io.on("connection", function (socket) {
         console.log("starting", data.roomId);
         io.sockets.in(data.roomId).emit("START_GAME", data.data);
         break;
+      case "FETCH_DATA":
       case "TO_JOKER_ROUND":
       case "TO_PRED_ROUND":
       case "TO_RESULTS_ROUND":

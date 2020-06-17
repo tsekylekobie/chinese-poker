@@ -1,4 +1,5 @@
 const Game = require("../models/game-model");
+const { STAGES } = require("../../common/constants");
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
@@ -11,6 +12,8 @@ module.exports = (req, res, next) => {
 
     if (!existingGame) {
       res.json({ error: "Invalid GameID" });
+    } else if (existingGame.gameStatus !== STAGES.WAIT) {
+      res.json({ error: "Game has already started" });
     } else if (existingGame.names.length < 4) {
       if (!existingGame.names.includes(userJoined)) {
         Game.model.findOneAndUpdate(

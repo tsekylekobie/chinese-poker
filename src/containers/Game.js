@@ -99,6 +99,9 @@ function Game(props) {
 
   // Set up websocket listeners
   useEffect(() => {
+    socket.on("FETCH_DATA", () => {
+      getGame(roomId, (data) => setMetadata(data));
+    });
     socket.on("START_GAME", (data) => {
       setGameStatus(STAGES.PLAY);
       setMetadata(data);
@@ -163,16 +166,16 @@ function Game(props) {
   }
 
   // helper function for submitJokerInfo
-  function replaceCard(hand, jokerInfo) {
+  function replaceCard(hand, handName, jokerInfo) {
     let idx = _.findIndex(hand, { name: jokerInfo.highlight });
     if (idx === -1) return false;
 
     setHands((state) => ({
       ...state,
-      hand1: [
-        ...hands.hand1.slice(0, idx),
+      [handName]: [
+        ...hand.slice(0, idx),
         jokerInfo.newCard,
-        ...hands.hand1.slice(idx + 1),
+        ...hand.slice(idx + 1),
       ],
     }));
     return true;
@@ -182,12 +185,14 @@ function Game(props) {
     const used = jokerInfo.highlight === "" ? false : jokerInfo.useJoker;
     if (used) {
       // replace card in hand if not found yet
-      replaceCard(hands.hand1, jokerInfo) ||
-        replaceCard(hands.hand2, jokerInfo) ||
-        replaceCard(hands.hand3, jokerInfo);
+      replaceCard(hands.hand1, "hand1", jokerInfo) ||
+        replaceCard(hands.hand2, "hand2", jokerInfo) ||
+        replaceCard(hands.hand3, "hand3", jokerInfo);
     }
     submitJoker(roomId, name, hands, used, (data) => {
       setMetadata(data);
+      socket.emit("action", { type: "FETCH_DATA", payload: { roomId } });
+
       if (data.gameStatus !== STAGES.PREDICT) {
         setGameStatus(STAGES.SUBMIT);
       } else {
@@ -202,6 +207,7 @@ function Game(props) {
   function submitPredictInfo() {
     submitPrediction(roomId, name, prediction, (data) => {
       setMetadata(data);
+      socket.emit("action", { type: "FETCH_DATA", payload: { roomId } });
       if (data.gameStatus !== STAGES.RESULT) {
         setGameStatus(STAGES.SUBMIT);
       } else {
