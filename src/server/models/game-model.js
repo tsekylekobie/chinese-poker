@@ -3,6 +3,7 @@ const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
 const Player = require("./player-model");
+const Round = require("./round-model");
 
 const gameSchema = new Schema(
   {
@@ -10,6 +11,7 @@ const gameSchema = new Schema(
     names: [String],
     gameStatus: Number,
     round: Number,
+    prevRounds: [Round.schema],
     players: [Player.schema],
   },
   { timestamps: true }

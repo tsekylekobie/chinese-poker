@@ -9,6 +9,8 @@ const playerSchema = new Schema({
   playerName: { type: String, lowercase: true },
   score: Number,
   jokersRemaining: Number,
+  useJoker: Boolean,
+  prediction: Number,
   submitted: Boolean,
   hand: [Card.schema],
   hand1: [Card.schema],
