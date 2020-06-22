@@ -56,6 +56,7 @@ module.exports = (req, res, next) => {
             p.score += score;
             p.handsWon = handsWon;
             p.submitted = false;
+            p.save();
           }
 
           game.gameStatus = STAGES.RESULT;

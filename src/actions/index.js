@@ -70,10 +70,11 @@ export function joinGame(gameId, name, callback) {
     });
 }
 
-export function startGame(gameId, callback) {
+export function startRound(gameId, isNewGame, callback) {
   axios
-    .post("/api/start-game", {
+    .post("/api/start-round", {
       gameId,
+      isNewGame,
     })
     .then((res) => {
       callback(res.data);

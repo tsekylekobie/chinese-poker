@@ -54,7 +54,6 @@ function calcScore(player, roundInfo) {
   if (handsWon === player.prediction) {
     score += 1.5;
   }
-  console.log("score for", player.playerName, "is", score);
   return { score, handsWon };
 }
 

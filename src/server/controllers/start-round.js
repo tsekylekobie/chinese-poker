@@ -7,6 +7,7 @@ const Deck = require("card-deck");
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
+  const isNewGame = req.body.isNewGame;
 
   Game.model.findOneAndUpdate(
     { gameId },
@@ -41,12 +42,18 @@ module.exports = (req, res, next) => {
         const player = new Player.model({
           gameId,
           playerName: existingGame.names[i],
-          score: 0,
-          jokersRemaining: 3,
+          score: isNewGame ? 0 : existingGame.players[i].score,
+          jokersRemaining: isNewGame
+            ? 3
+            : existingGame.players[i].jokersRemaining,
           useJoker: false,
           prediction: 0,
+          handsWon: 0,
           submitted: false,
           hand: newDeck.draw(13),
+          hand1: [],
+          hand2: [],
+          hand3: [],
         });
         player.save();
         existingGame.players[i] = player;

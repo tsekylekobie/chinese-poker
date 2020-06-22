@@ -11,7 +11,7 @@ import LeftSidebar from "../components/LeftSidebar";
 import BottomNav from "../components/BottomNav";
 import Results from "../components/Results";
 import {
-  startGame,
+  startRound,
   getPlayer,
   getGame,
   submitHands,
@@ -89,6 +89,7 @@ function Game(props) {
     getGame(roomId, (data) => {
       setMetadata(data);
       console.log("Game status", data.gameStatus); // for debugging
+      setGameStatus(data.gameStatus);
       switch (data.gameStatus) {
         case STAGES.WAIT:
           break;
@@ -96,8 +97,7 @@ function Game(props) {
         case STAGES.JOKER:
         case STAGES.PREDICT:
           fetchHand();
-        default:
-          setGameStatus(data.gameStatus);
+          break;
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -139,7 +139,17 @@ function Game(props) {
   }
 
   function startGameHandler() {
-    startGame(roomId, (data) => {
+    startRound(roomId, true, (data) => {
+      setMetadata(data);
+      socket.emit("action", {
+        type: "START_GAME",
+        payload: { roomId, data },
+      });
+    });
+  }
+
+  function nextRoundHandler() {
+    startRound(roomId, false, (data) => {
       setMetadata(data);
       socket.emit("action", {
         type: "START_GAME",
@@ -200,6 +210,7 @@ function Game(props) {
 
     submitJoker(roomId, name, newHands, used, (data) => {
       socket.emit("action", { type: "FETCH_DATA", payload: { roomId } });
+      setJokerInfo(defaultJokerInfo);
 
       if (data.gameStatus !== STAGES.PREDICT) {
         setGameStatus(STAGES.SUBMIT);
@@ -265,6 +276,7 @@ function Game(props) {
         prediction,
         setPrediction,
         startGameHandler,
+        nextRoundHandler,
         submitCards,
         submitJokerInfo,
         submitPredictInfo,

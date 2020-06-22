@@ -1,22 +1,29 @@
 import React, { useContext } from "react";
-import { makeStyles } from "@material-ui/core/styles";
 import _ from "lodash";
 
 import { Grid, Typography } from "@material-ui/core";
-
 import Hand from "../components/Hand";
 import { CardsContext } from "../containers/Game";
 
 function Results() {
   const { metadata } = useContext(CardsContext);
   const width = 12 / metadata.names.length;
-  const { winner1, winner2, winner3 } = metadata.prevRounds[metadata.round - 1];
+  let winner1 = [],
+    winner2 = [],
+    winner3 = [];
+  if (metadata.prevRounds.length === metadata.round) {
+    const lastRound = metadata.prevRounds[metadata.round - 1];
+    winner1 = lastRound.winner1;
+    winner2 = lastRound.winner2;
+    winner3 = lastRound.winner3;
+  }
 
   return (
     <React.Fragment>
-      {metadata.players.map((p) => {
+      {metadata.players.map((p, i) => {
         return (
           <Grid
+            key={i}
             container
             item
             xs={width}

@@ -35,6 +35,7 @@ function BottomNav() {
     prediction,
     setPrediction,
     startGameHandler,
+    nextRoundHandler,
     submitCards,
     submitJokerInfo,
     submitPredictInfo,
@@ -230,6 +231,7 @@ function BottomNav() {
               variant="contained"
               className={classes.button}
               color="primary"
+              onClick={nextRoundHandler}
             >
               Next round
             </Button>
