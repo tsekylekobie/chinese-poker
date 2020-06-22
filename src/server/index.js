@@ -7,6 +7,7 @@ const socketIO = require("socket.io");
 const mongoose = require("mongoose");
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 const router = require("./router");
 
 // Server setup
@@ -21,7 +22,7 @@ mongoose.connect("mongodb://localhost:test", {
 });
 
 // App Setup
-app.set("port", 8080);
+app.set("port", PORT);
 app.use(bodyParser.json({ type: "*/*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "build")));
@@ -33,7 +34,7 @@ app.get("/", function (req, res) {
 router(app);
 
 // Starts the server.
-server.listen(8080, function () {
+server.listen(PORT, function () {
   console.log("Starting server on port 8080");
 });
 
