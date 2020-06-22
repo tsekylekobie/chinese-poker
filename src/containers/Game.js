@@ -9,6 +9,7 @@ import Hand from "../components/Hand";
 import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import BottomNav from "../components/BottomNav";
+import Results from "../components/Results";
 import {
   startGame,
   getPlayer,
@@ -79,6 +80,10 @@ function Game(props) {
       }));
     });
 
+  useEffect(() => {
+    fetchHand();
+  }, [metadata]);
+
   // On component mount
   useEffect(function getGameInfo() {
     getGame(roomId, (data) => {
@@ -89,6 +94,7 @@ function Game(props) {
           break;
         case STAGES.PLAY:
         case STAGES.JOKER:
+        case STAGES.PREDICT:
           fetchHand();
         default:
           setGameStatus(data.gameStatus);
@@ -168,29 +174,31 @@ function Game(props) {
   // helper function for submitJokerInfo
   function replaceCard(hand, handName, jokerInfo) {
     let idx = _.findIndex(hand, { name: jokerInfo.highlight });
-    if (idx === -1) return false;
+    if (idx === -1) return null;
 
-    setHands((state) => ({
-      ...state,
+    const newHands = {
+      ...hands,
       [handName]: [
         ...hand.slice(0, idx),
         jokerInfo.newCard,
         ...hand.slice(idx + 1),
       ],
-    }));
-    return true;
+    };
+    return newHands;
   }
 
   function submitJokerInfo() {
     const used = jokerInfo.highlight === "" ? false : jokerInfo.useJoker;
+    let newHands = hands;
     if (used) {
       // replace card in hand if not found yet
-      replaceCard(hands.hand1, "hand1", jokerInfo) ||
+      newHands =
+        replaceCard(hands.hand1, "hand1", jokerInfo) ||
         replaceCard(hands.hand2, "hand2", jokerInfo) ||
         replaceCard(hands.hand3, "hand3", jokerInfo);
     }
-    submitJoker(roomId, name, hands, used, (data) => {
-      setMetadata(data);
+
+    submitJoker(roomId, name, newHands, used, (data) => {
       socket.emit("action", { type: "FETCH_DATA", payload: { roomId } });
 
       if (data.gameStatus !== STAGES.PREDICT) {
@@ -206,7 +214,6 @@ function Game(props) {
 
   function submitPredictInfo() {
     submitPrediction(roomId, name, prediction, (data) => {
-      setMetadata(data);
       socket.emit("action", { type: "FETCH_DATA", payload: { roomId } });
       if (data.gameStatus !== STAGES.RESULT) {
         setGameStatus(STAGES.SUBMIT);
@@ -218,6 +225,33 @@ function Game(props) {
       }
     });
   }
+
+  const topDiv =
+    gameStatus === STAGES.RESULT ? (
+      <Results />
+    ) : (
+      <React.Fragment>
+        <Grid container item xs={3} direction="column">
+          <LeftSidebar />
+        </Grid>
+        <Grid
+          container
+          item
+          xs={6}
+          direction="column"
+          justify="center"
+          alignItems="center"
+        >
+          <Button onClick={autoSetHands}>Set hands</Button>
+          <Hand name={"hand1"}>{hands.hand1}</Hand>
+          <Hand name={"hand2"}>{hands.hand2}</Hand>
+          <Hand name={"hand3"}>{hands.hand3}</Hand>
+        </Grid>
+        <Grid container item xs={3}>
+          {gameStatus !== STAGES.WAIT && <RightSidebar />}
+        </Grid>
+      </React.Fragment>
+    );
 
   return (
     <CardsContext.Provider
@@ -257,25 +291,7 @@ function Game(props) {
             justify="center"
             alignItems="flex-start"
           >
-            <Grid container item xs={3} direction="column">
-              <LeftSidebar />
-            </Grid>
-            <Grid
-              container
-              item
-              xs={6}
-              direction="column"
-              justify="center"
-              alignItems="center"
-            >
-              <Button onClick={autoSetHands}>Set hands</Button>
-              <Hand name={"hand1"}>{hands.hand1}</Hand>
-              <Hand name={"hand2"}>{hands.hand2}</Hand>
-              <Hand name={"hand3"}>{hands.hand3}</Hand>
-            </Grid>
-            <Grid container item xs={3}>
-              {gameStatus !== STAGES.WAIT && <RightSidebar />}
-            </Grid>
+            {topDiv}
           </Grid>
           <Grid
             container

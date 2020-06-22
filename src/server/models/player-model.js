@@ -11,6 +11,7 @@ const playerSchema = new Schema({
   jokersRemaining: Number,
   useJoker: Boolean,
   prediction: Number,
+  handsWon: Number,
   submitted: Boolean,
   hand: [Card.schema],
   hand1: [Card.schema],

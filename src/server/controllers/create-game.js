@@ -16,6 +16,7 @@ module.exports = (req, res, next) => {
       names: creator,
       gameStatus: STAGES.WAIT,
       round: 0,
+      prevRounds: [],
     });
 
     newGame.save();

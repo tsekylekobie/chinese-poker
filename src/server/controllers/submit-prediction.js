@@ -1,7 +1,9 @@
 const _ = require("lodash");
 const Game = require("../models/game-model");
 const Player = require("../models/player-model");
+const Round = require("../models/round-model");
 const { STAGES } = require("../../common/constants");
+const { getWinners, calcScore } = require("../../common/helper");
 
 module.exports = (req, res, next) => {
   const gameId = req.body.gameId;
@@ -29,13 +31,34 @@ module.exports = (req, res, next) => {
           if (!game.players[i].submitted) allSubmitted = false;
         }
 
-        // if all players submitted, then advance to results
+        // if all players submitted, then generate results
         if (allSubmitted) {
-          game.gameStatus = STAGES.RESULT;
+          const h1 = game.players.map((p) => p.hand1);
+          const h2 = game.players.map((p) => p.hand2);
+          const h3 = game.players.map((p) => p.hand3);
+          const [w1, w2, w3] = getWinners(h1, h2, h3);
+
+          const round = new Round.model({
+            gameId: game.gameId,
+            round: game.round,
+            players: game.players,
+            winner1: w1.map((i) => game.names[i]),
+            winner2: w2.map((i) => game.names[i]),
+            winner3: w3.map((i) => game.names[i]),
+          });
+          game.prevRounds.push(round);
+
+          // distribute points and penalties
           for (let i = 0; i < game.players.length; i++) {
+            let p = game.players[i];
             // reset flag so we can use for future rounds
-            game.players[i].submitted = false;
+            const { score, handsWon } = calcScore(p, round);
+            p.score += score;
+            p.handsWon = handsWon;
+            p.submitted = false;
           }
+
+          game.gameStatus = STAGES.RESULT;
         }
 
         game.save();

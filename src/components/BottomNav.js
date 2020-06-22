@@ -6,9 +6,13 @@ import { ToggleButton, ToggleButtonGroup } from "@material-ui/lab";
 
 import { CardsContext } from "../containers/Game";
 import Hand from "../components/Hand";
+import Table, { createRowData } from "./Table";
 import { STAGES } from "../common/constants";
 
 const useStyles = makeStyles((theme) => ({
+  control: {
+    margin: theme.spacing(1),
+  },
   button: {
     margin: theme.spacing(1),
   },
@@ -22,6 +26,7 @@ const useStyles = makeStyles((theme) => ({
 function BottomNav() {
   const classes = useStyles();
   const {
+    metadata,
     hands,
     setHands,
     gameStatus,
@@ -73,6 +78,24 @@ function BottomNav() {
 
   function updatePrediction(_, newStatus) {
     if (newStatus !== null) setPrediction(newStatus);
+  }
+
+  let rows = [];
+  if (metadata && metadata.players) {
+    rows = [
+      createRowData(
+        "Predicted",
+        metadata.players.map((p) => p.prediction)
+      ),
+      createRowData(
+        "Hands Won",
+        metadata.players.map((p) => p.handsWon)
+      ),
+      createRowData(
+        "Total Score",
+        metadata.players.map((p) => p.score)
+      ),
+    ];
   }
 
   let bottomDiv;
@@ -199,6 +222,21 @@ function BottomNav() {
       );
       break;
     case STAGES.RESULT:
+      bottomDiv = (
+        <Grid container item xs={4} direction="column" alignItems="center">
+          <Table rows={rows} data={metadata} />
+          <Grid className={classes.control} item xs={12}>
+            <Button
+              variant="contained"
+              className={classes.button}
+              color="primary"
+            >
+              Next round
+            </Button>
+          </Grid>
+        </Grid>
+      );
+      break;
     case STAGES.END:
     default:
       bottomDiv = <div />;

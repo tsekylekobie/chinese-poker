@@ -33,6 +33,7 @@ const theme = createMuiTheme({
   palette: {
     primary: {
       main: "#6200EE", // purple
+      light: "#EFE5FD",
     },
     secondary: {
       main: "#03DAC6", // teal

@@ -30,6 +30,15 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
+export function createRowData(name, players) {
+  const data = { name };
+  for (let i = 0; i < players.length; i++) {
+    const key = `player_${i + 1}`;
+    data[key] = players[i];
+  }
+  return data;
+}
+
 function displayRow(data, rowData) {
   return (
     <TableRow key={rowData.name}>

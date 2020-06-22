@@ -2,16 +2,7 @@ import React, { useContext, useState } from "react";
 import { Typography, Switch, FormControlLabel } from "@material-ui/core";
 
 import { CardsContext } from "../containers/Game";
-import Table from "./Table";
-
-function createRowData(name, players) {
-  const data = { name };
-  for (let i = 0; i < players.length; i++) {
-    const key = `player_${i + 1}`;
-    data[key] = players[i];
-  }
-  return data;
-}
+import Table, { createRowData } from "./Table";
 
 function RightSidebar() {
   const { metadata } = useContext(CardsContext);

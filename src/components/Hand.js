@@ -1,4 +1,6 @@
 import React, { useContext } from "react";
+import clsx from "clsx";
+import { makeStyles } from "@material-ui/core/styles";
 import { Grid } from "@material-ui/core";
 import _ from "lodash";
 
@@ -7,9 +9,25 @@ import { CardsContext } from "../containers/Game";
 import Card from "./Card";
 import { STAGES } from "../common/constants";
 
+const useStyles = makeStyles((theme) => ({
+  hand: {
+    marginTop: theme.spacing(2),
+    padding: theme.spacing(1),
+    boxSizing: "content-box",
+    minHeight: 127,
+    borderRadius: 4,
+  },
+  bottomHand: {
+    marginBottom: theme.spacing(2),
+  },
+  main: { backgroundColor: theme.palette.primary.light },
+  highlight: { backgroundColor: theme.palette.secondary.main },
+}));
+
 function Hand(props) {
+  const classes = useStyles();
   const { hands, setHands, jokerInfo, gameStatus } = useContext(CardsContext);
-  const { children, name } = props;
+  const { children, name, highlight } = props;
 
   const onDrop = (e) => {
     e.preventDefault();
@@ -25,19 +43,16 @@ function Hand(props) {
     e.preventDefault();
   };
 
-  let classes, xs;
+  let xs;
   switch (name) {
     case "hand1":
-      classes = "hand three";
       xs = 7;
       break;
     case "hand2":
     case "hand3":
-      classes = "hand five";
       xs = 10;
       break;
     default:
-      classes = "hand";
       xs = 12;
   }
 
@@ -45,7 +60,11 @@ function Hand(props) {
     <Grid
       container
       item
-      className={classes}
+      className={clsx(
+        classes.hand,
+        highlight ? classes.highlight : classes.main,
+        name === "hand3" && classes.bottomHand
+      )}
       direction="row"
       justify="center"
       alignItems="center"
