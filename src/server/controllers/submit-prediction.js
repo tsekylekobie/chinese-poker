@@ -41,12 +41,10 @@ module.exports = (req, res, next) => {
           const round = new Round.model({
             gameId: game.gameId,
             round: game.round,
-            players: game.players,
             winner1: w1.map((i) => game.names[i]),
             winner2: w2.map((i) => game.names[i]),
             winner3: w3.map((i) => game.names[i]),
           });
-          game.prevRounds.push(round);
 
           // distribute points and penalties
           for (let i = 0; i < game.players.length; i++) {
@@ -58,7 +56,9 @@ module.exports = (req, res, next) => {
             p.submitted = false;
             p.save();
           }
+          round.players = game.players;
 
+          game.prevRounds.push(round);
           game.gameStatus = STAGES.RESULT;
         }
 

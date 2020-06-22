@@ -5,11 +5,11 @@ import { CardsContext } from "../containers/Game";
 import Table, { createRowData } from "./Table";
 
 function RightSidebar() {
-  const { metadata } = useContext(CardsContext);
-  const [showHistory, setShowHistory] = useState(false);
+  const { metadata, showHistory, setShowHistory } = useContext(CardsContext);
 
   let overall = [],
-    round = [];
+    round = [],
+    history = [];
   if (metadata && metadata.players) {
     overall = [
       createRowData(
@@ -31,6 +31,12 @@ function RightSidebar() {
         metadata.players.map((p) => p.prediction || "-")
       ),
     ];
+    history = metadata.prevRounds.map((round) =>
+      createRowData(
+        `Round ${round.round}`,
+        round.players.map((p) => p.score)
+      )
+    );
   }
 
   return (
@@ -52,7 +58,7 @@ function RightSidebar() {
         label="View past rounds"
         style={{ marginTop: 16 }}
       />
-      {showHistory && <Table data={metadata} rows={overall} />}
+      {showHistory && <Table data={metadata} rows={history} />}
     </React.Fragment>
   );
 }

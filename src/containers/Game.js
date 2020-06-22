@@ -54,7 +54,6 @@ function Game(props) {
     setError("");
   };
 
-  // State variables for joker stage
   const defaultJokerInfo = {
     useJoker: false,
     highlight: "",
@@ -65,9 +64,8 @@ function Game(props) {
     },
   };
   const [jokerInfo, setJokerInfo] = useState(defaultJokerInfo);
-
-  // State variables for prediction stage
   const [prediction, setPrediction] = useState(0);
+  const [showHistory, setShowHistory] = useState(false);
 
   const fetchHand = () =>
     getPlayer(roomId, name, (data) => {
@@ -82,6 +80,7 @@ function Game(props) {
 
   useEffect(() => {
     fetchHand();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [metadata]);
 
   // On component mount
@@ -98,6 +97,7 @@ function Game(props) {
         case STAGES.PREDICT:
           fetchHand();
           break;
+        // no default
       }
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -111,7 +111,6 @@ function Game(props) {
     socket.on("START_GAME", (data) => {
       setGameStatus(STAGES.PLAY);
       setMetadata(data);
-      fetchHand();
     });
     socket.on("TO_JOKER_ROUND", () => {
       setGameStatus(STAGES.JOKER);
@@ -275,6 +274,8 @@ function Game(props) {
         setJokerInfo,
         prediction,
         setPrediction,
+        showHistory,
+        setShowHistory,
         startGameHandler,
         nextRoundHandler,
         submitCards,

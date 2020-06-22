@@ -16,6 +16,7 @@ import { RANKS, SUITS, STAGES } from "../common/constants";
 const useStyles = makeStyles((theme) => ({
   card: {
     padding: theme.spacing(2),
+    marginTop: theme.spacing(1),
   },
 }));
 

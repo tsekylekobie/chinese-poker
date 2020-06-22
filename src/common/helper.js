@@ -16,6 +16,7 @@ function getCardName(card) {
 
 // Return names of winners
 function getWinners(hands1, hands2, hands3) {
+  // TODO: consider 5-of-a-kind
   const parseHand = (h) => {
     const cardNames = h.map((c) => getCardName(c));
     return Hand.solve(cardNames);
