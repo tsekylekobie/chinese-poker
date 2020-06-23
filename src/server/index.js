@@ -25,7 +25,7 @@ mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:test", {
 app.set("port", PORT);
 app.use(bodyParser.json({ type: "*/*" }));
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "build")));
+app.use(express.static(path.join(__dirname, "..", "..", "build")));
 
 // Routing
 app.get("/", function (req, res) {
