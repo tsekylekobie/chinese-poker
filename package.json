@@ -12,6 +12,7 @@
     "axios": "^0.19.2",
     "card-deck": "^1.0.1",
     "clsx": "^1.1.1",
+    "concurrently": "^5.2.0",
     "engine.io": "^3.4.1",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
@@ -24,11 +25,14 @@
     "socket.io": "^2.3.0"
   },
   "scripts": {
-    "start": "node backend/server.js",
+    "start": "node src/server/index.js",
     "build": "react-scripts build",
+    "install-client": "npm install",
     "test": "react-scripts test",
     "eject": "react-scripts eject",
-    "heroku-postbuild": "NPM_CONFIG_PRODUCTION=false npm install npm && run build"
+    "heroku-postbuild": "npm run install-client && npm run build",
+    "client": "react-scripts start",
+    "dev": "concurrently -n 'server,client' -c 'red,green' \"nodemon src/server/index.js\" \"npm run client\""
   },
   "engines": {
     "node": "10.16.0"
@@ -48,5 +52,8 @@
       "last 1 safari version"
     ]
   },
-  "proxy": "http://localhost:8080"
+  "proxy": "http://localhost:8080",
+  "devDependencies": {
+    "mongoose": "^5.9.20"
+  }
 }

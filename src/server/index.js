@@ -15,7 +15,7 @@ const server = http.createServer(app);
 const io = socketIO(server);
 
 // DB Setup
-mongoose.connect("mongodb://localhost:test", {
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:test", {
   useNewUrlParser: true,
   useUnifiedTopology: true,
   useFindAndModify: false,
@@ -29,7 +29,7 @@ app.use(express.static(path.join(__dirname, "build")));
 
 // Routing
 app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "build", "index.html"));
+  res.sendFile(path.join(__dirname, "..", "..", "build", "index.html"));
 });
 router(app);
 
