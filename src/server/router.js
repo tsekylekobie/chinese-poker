@@ -9,13 +9,13 @@ const submitJoker = require("./controllers/submit-joker");
 const submitPrediction = require("./controllers/submit-prediction");
 
 const router = express.Router();
-router.get("/api/get-player", getPlayer);
-router.get("/api/get-game", getGame);
-router.post("/api/create-game", createGame);
-router.post("/api/join-game", joinGame);
-router.post("/api/start-round", startRound);
-router.post("/api/submit-hands", submitHands);
-router.post("/api/submit-joker", submitJoker);
-router.post("/api/submit-prediction", submitPrediction);
+router.get("/get-player", getPlayer);
+router.get("/get-game", getGame);
+router.post("/create-game", createGame);
+router.post("/join-game", joinGame);
+router.post("/start-round", startRound);
+router.post("/submit-hands", submitHands);
+router.post("/submit-joker", submitJoker);
+router.post("/submit-prediction", submitPrediction);
 
 module.exports = router;

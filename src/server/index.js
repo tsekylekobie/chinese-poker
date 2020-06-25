@@ -7,38 +7,17 @@ const socketIO = require("socket.io");
 const mongoose = require("mongoose");
 const routes = require("./router");
 
-const app = express();
-const PORT = process.env.PORT || 8080;
+const PORT = process.env.PORT || 3000;
 
-// Server setup
-const server = http.createServer(app);
-const io = socketIO(server);
-
-// DB Setup
-mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:test", {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-  useFindAndModify: false,
-});
-
-// App Setup
-app.set("port", PORT);
-app.use(bodyParser.json({ type: "*/*" }));
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(path.join(__dirname, "..", "..", "build")));
-
-// Routing
-app.get("/", function (req, res) {
-  res.sendFile(path.join(__dirname, "..", "..", "build", "index.html"));
-});
-app.use("/", routes);
-
-// Starts the server.
-app.listen(PORT, function () {
-  console.log(`Starting server on port ${PORT}`);
-});
+const server = express()
+  .use(bodyParser.json({ type: "*/*" }))
+  .use(bodyParser.urlencoded({ extended: true }))
+  .use(express.static(path.join(__dirname, "..", "..", "build")))
+  .use("/api", routes)
+  .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 // Add the WebSocket handlers
+const io = socketIO(server);
 io.on("connection", function (socket) {
   console.log("a user connected");
   socket.on("disconnect", () => {
@@ -66,4 +45,11 @@ io.on("connection", function (socket) {
         null;
     }
   });
+});
+
+// DB Setup
+mongoose.connect(process.env.MONGODB_URI || "mongodb://localhost:test", {
+  useNewUrlParser: true,
+  useUnifiedTopology: true,
+  useFindAndModify: false,
 });
