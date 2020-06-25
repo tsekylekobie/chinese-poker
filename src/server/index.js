@@ -5,10 +5,10 @@ const path = require("path");
 const bodyParser = require("body-parser");
 const socketIO = require("socket.io");
 const mongoose = require("mongoose");
+const routes = require("./router");
 
 const app = express();
 const PORT = process.env.PORT || 8080;
-const router = require("./router");
 
 // Server setup
 const server = http.createServer(app);
@@ -31,11 +31,11 @@ app.use(express.static(path.join(__dirname, "..", "..", "build")));
 app.get("/", function (req, res) {
   res.sendFile(path.join(__dirname, "..", "..", "build", "index.html"));
 });
-router(app);
+app.use("/", routes);
 
 // Starts the server.
-server.listen(PORT, function () {
-  console.log("Starting server on port 8080");
+app.listen(PORT, function () {
+  console.log(`Starting server on port ${PORT}`);
 });
 
 // Add the WebSocket handlers

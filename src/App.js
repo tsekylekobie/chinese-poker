@@ -14,8 +14,7 @@ import Lobby from "./containers/Lobby";
 import Game from "./containers/Game";
 import "./App.css";
 
-const ENDPOINT = "http://localhost:8080";
-const socket = io(ENDPOINT);
+const socket = io();
 
 const useStyles = makeStyles((theme) => ({
   title: {
