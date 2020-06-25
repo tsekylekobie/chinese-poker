@@ -6,6 +6,9 @@ import {
   Button,
   TextField,
   Snackbar,
+  Tabs,
+  Tab,
+  Paper,
 } from "@material-ui/core";
 import { Alert } from "@material-ui/lab/";
 
@@ -22,19 +25,41 @@ const useStyles = makeStyles((theme) => ({
     padding: theme.spacing(4),
   },
   control: {
+    marginTop: theme.spacing(1),
     padding: theme.spacing(1),
   },
-  button: {
+  input: {
     margin: theme.spacing(1),
   },
 }));
 
 function Lobby(props) {
   const classes = useStyles();
-  const { socket, name } = useContext(AppContext);
+  const { socket, name, setName } = useContext(AppContext);
+
+  function TabPanel(props) {
+    const { children, value, index } = props;
+
+    return (
+      <div hidden={value !== index}>
+        {value === index && (
+          <Grid
+            container
+            className={classes.control}
+            direction="column"
+            justify="center"
+            alignItems="center"
+          >
+            {children}
+          </Grid>
+        )}
+      </div>
+    );
+  }
 
   // For displaying errors
   const [error, setError] = useState("");
+  const [tabIndex, setTabIndex] = useState(0);
   const handleClose = (event, reason) => {
     if (reason === "clickaway") return;
     setError("");
@@ -93,40 +118,65 @@ function Lobby(props) {
         <Grid
           container
           className={classes.control}
-          direction="row"
+          direction="column"
           justify="center"
           alignItems="center"
         >
-          <TextField
-            label="Game ID"
-            variant="outlined"
-            defaultValue={gameId}
-            onChange={(e) => setGameId(e.target.value)}
-          />
-        </Grid>
-        <Grid
-          container
-          className={classes.control}
-          direction="row"
-          justify="center"
-          alignItems="center"
-        >
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="primary"
-            onClick={createRoom}
-          >
-            Create room
-          </Button>
-          <Button
-            variant="contained"
-            className={classes.button}
-            color="primary"
-            onClick={joinRoom}
-          >
-            Join room
-          </Button>
+          <Paper>
+            <Tabs
+              value={tabIndex}
+              indicatorColor="primary"
+              textColor="primary"
+              onChange={(_, val) => setTabIndex(val)}
+            >
+              <Tab label="Create room" value={0} />
+              <Tab label="Join room" value={1} />
+            </Tabs>
+            <TabPanel value={tabIndex} index={0}>
+              <TextField
+                label="Name"
+                className={classes.input}
+                variant="outlined"
+                size="small"
+                defaultValue={name}
+                onBlur={(e) => setName(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                className={classes.input}
+                color="primary"
+                onClick={createRoom}
+              >
+                Create game
+              </Button>
+            </TabPanel>
+            <TabPanel value={tabIndex} index={1}>
+              <TextField
+                label="Name"
+                className={classes.input}
+                variant="outlined"
+                size="small"
+                defaultValue={name}
+                onBlur={(e) => setName(e.target.value)}
+              />
+              <TextField
+                label="Game ID"
+                className={classes.input}
+                variant="outlined"
+                size="small"
+                defaultValue={gameId}
+                onBlur={(e) => setGameId(e.target.value)}
+              />
+              <Button
+                variant="contained"
+                className={classes.input}
+                color="primary"
+                onClick={joinRoom}
+              >
+                Join game
+              </Button>
+            </TabPanel>
+          </Paper>
         </Grid>
       </Grid>
     </Container>

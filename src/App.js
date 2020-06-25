@@ -8,7 +8,6 @@ import {
   ThemeProvider,
 } from "@material-ui/core/styles";
 import { AppBar, Toolbar, Typography, Button } from "@material-ui/core";
-import EditIcon from "@material-ui/icons/Edit";
 
 import Lobby from "./containers/Lobby";
 import Game from "./containers/Game";
@@ -54,7 +53,6 @@ const history = createBrowserHistory();
 function App() {
   const classes = useStyles();
   const [name, setName] = useState(localStorage.getItem("playerName"));
-  const [open, toggleDisplay] = useState(false);
 
   useEffect(
     function persistName() {
@@ -76,29 +74,10 @@ function App() {
                 Chinese Poker
               </span>
             </Typography>
-            {open ? (
-              <input
-                type="text"
-                placeholder="Name"
-                defaultValue={name}
-                onChange={(e) => setName(e.target.value)}
-                onBlur={() => toggleDisplay(false)}
-                autoFocus
-              />
-            ) : (
-              <Button
-                color="inherit"
-                className={classes.button}
-                startIcon={<EditIcon />}
-                onClick={() => toggleDisplay(true)}
-              >
-                {name || "Enter a name"}
-              </Button>
-            )}
             <Button color="inherit">Rules</Button>
           </Toolbar>
         </AppBar>
-        <AppContext.Provider value={{ socket, name }}>
+        <AppContext.Provider value={{ socket, name, setName }}>
           <Switch>
             <Route path="/game/:roomID" component={Game} />
             <Route path="/" component={Lobby} />

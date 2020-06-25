@@ -6,7 +6,7 @@ const socketIO = require("socket.io");
 const mongoose = require("mongoose");
 const routes = require("./router");
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8080;
 
 const server = express()
   .use(bodyParser.json({ type: "*/*" }))
