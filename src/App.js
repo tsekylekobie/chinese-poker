@@ -61,23 +61,24 @@ function App() {
     [name]
   );
 
+  function goHome() {
+    history.push("/");
+  }
+
   return (
     <ThemeProvider theme={theme}>
       <Router history={history}>
         <AppBar position="static" color="primary">
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
-              <span
-                className={classes.titleText}
-                onClick={() => history.push("/")}
-              >
+              <span className={classes.titleText} onClick={goHome}>
                 Chinese Poker
               </span>
             </Typography>
             <Button color="inherit">Rules</Button>
           </Toolbar>
         </AppBar>
-        <AppContext.Provider value={{ socket, name, setName }}>
+        <AppContext.Provider value={{ socket, name, setName, goHome }}>
           <Switch>
             <Route path="/game/:roomID" component={Game} />
             <Route path="/" component={Lobby} />

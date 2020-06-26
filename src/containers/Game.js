@@ -10,6 +10,7 @@ import RightSidebar from "../components/RightSidebar";
 import LeftSidebar from "../components/LeftSidebar";
 import BottomNav from "../components/BottomNav";
 import Results from "../components/Results";
+import EndResults from "../components/EndResults";
 import {
   startRound,
   getPlayer,
@@ -35,8 +36,7 @@ export const CardsContext = createContext();
 
 function Game(props) {
   const classes = useStyles();
-  const { socket, name } = useContext(AppContext);
-
+  const { socket, name, goHome } = useContext(AppContext);
   const roomId = props.match.params.roomID;
   const [gameStatus, setGameStatus] = useState(STAGES.WAIT);
   const [metadata, setMetadata] = useState({});
@@ -157,6 +157,10 @@ function Game(props) {
     });
   }
 
+  function endGameHandler() {
+    setGameStatus(STAGES.END);
+  }
+
   function checkHandSizes() {
     const { hand1, hand2, hand3 } = hands;
     return hand1.length === 3 && hand2.length === 5 && hand3.length === 5;
@@ -236,10 +240,13 @@ function Game(props) {
     });
   }
 
-  const topDiv =
-    gameStatus === STAGES.RESULT ? (
-      <Results />
-    ) : (
+  let topDiv;
+  if (gameStatus === STAGES.RESULT) {
+    topDiv = <Results />;
+  } else if (gameStatus === STAGES.END) {
+    topDiv = <EndResults goHomeHandler={goHome} />;
+  } else {
+    topDiv = (
       <React.Fragment>
         <Grid container item xs={3} direction="column">
           <LeftSidebar />
@@ -262,10 +269,12 @@ function Game(props) {
         </Grid>
       </React.Fragment>
     );
+  }
 
   return (
     <CardsContext.Provider
       value={{
+        name,
         metadata,
         hands,
         setHands,
@@ -278,6 +287,7 @@ function Game(props) {
         setShowHistory,
         startGameHandler,
         nextRoundHandler,
+        endGameHandler,
         submitCards,
         submitJokerInfo,
         submitPredictInfo,

@@ -36,6 +36,7 @@ function BottomNav() {
     setPrediction,
     startGameHandler,
     nextRoundHandler,
+    endGameHandler,
     submitCards,
     submitJokerInfo,
     submitPredictInfo,
@@ -227,14 +228,25 @@ function BottomNav() {
         <Grid container item xs={4} direction="column" alignItems="center">
           <Table rows={rows} data={metadata} />
           <Grid className={classes.control} item xs={12}>
-            <Button
-              variant="contained"
-              className={classes.button}
-              color="primary"
-              onClick={nextRoundHandler}
-            >
-              Next round
-            </Button>
+            {metadata.round < 1 ? (
+              <Button
+                variant="contained"
+                className={classes.button}
+                color="primary"
+                onClick={nextRoundHandler}
+              >
+                Next round
+              </Button>
+            ) : (
+              <Button
+                variant="contained"
+                className={classes.button}
+                color="primary"
+                onClick={endGameHandler}
+              >
+                See Results
+              </Button>
+            )}
           </Grid>
         </Grid>
       );
