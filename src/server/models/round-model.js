@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 const Player = require("./player-model");
 
 const roundSchema = new Schema({
-  gameId: { type: String, unique: true },
+  gameId: String,
   round: Number,
   players: [Player.schema],
   winner1: [String],
