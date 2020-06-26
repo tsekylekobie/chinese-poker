@@ -13,6 +13,9 @@ const server = express()
   .use(bodyParser.urlencoded({ extended: true }))
   .use(express.static(path.join(__dirname, "..", "..", "build")))
   .use("/api", routes)
+  .get("*", (req, res) =>
+    res.sendFile(path.resolve(__dirname, "..", "..", "build", "index.html"))
+  )
   .listen(PORT, () => console.log(`Listening on ${PORT}`));
 
 // Add the WebSocket handlers
