@@ -22,7 +22,7 @@ const useStyles = makeStyles((theme) => ({
 
 function LeftSidebar() {
   const classes = useStyles();
-  const { gameStatus, jokerInfo, setJokerInfo, metadata } = useContext(
+  const { roomId, gameStatus, jokerInfo, setJokerInfo, metadata } = useContext(
     CardsContext
   );
   const { useJoker, highlight, newCard } = jokerInfo;
@@ -99,10 +99,12 @@ function LeftSidebar() {
   return (
     <React.Fragment>
       <Typography variant="subtitle1">
+        <b>Room code:</b>&nbsp;{roomId}
+        <br />
         <b>Round:</b>&nbsp;{currRound}
-      </Typography>
-      <Typography variant="subtitle1">
+        <br />
         <b>Starting player:</b>&nbsp;{startingPlayer}
+        <br />
       </Typography>
       {gameStatus === STAGES.JOKER && useJoker && highlight && selectCardWindow}
     </React.Fragment>

@@ -129,6 +129,8 @@ function Game(props) {
   // For testing purposes
   function autoSetHands() {
     const { myHand } = hands;
+    if (!myHand || myHand.length !== 13) return;
+
     setHands({
       myHand: [],
       hand1: myHand.slice(0, 3),
@@ -202,6 +204,13 @@ function Game(props) {
 
   function submitJokerInfo() {
     const used = jokerInfo.highlight === "" ? false : jokerInfo.useJoker;
+
+    const player = _.find(metadata.players, (p) => p.playerName === name);
+    if (used && player.jokersRemaining <= 0) {
+      setError("You have no more jokers");
+      return;
+    }
+
     let newHands = hands;
     if (used) {
       // replace card in hand if not found yet
@@ -275,6 +284,7 @@ function Game(props) {
     <CardsContext.Provider
       value={{
         name,
+        roomId,
         metadata,
         hands,
         setHands,

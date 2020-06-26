@@ -2,8 +2,7 @@ const Game = require("../models/game-model");
 const { STAGES } = require("../../common/constants");
 
 module.exports = (req, res, next) => {
-  const gameId = req.body.gameId;
-  const creator = req.body.creator;
+  const { gameId, creator, numRounds, numJokers } = req.body;
 
   Game.model.findOne({ gameId }, (err, existingGame) => {
     if (err) return next(err);
@@ -16,6 +15,8 @@ module.exports = (req, res, next) => {
       names: creator,
       gameStatus: STAGES.WAIT,
       round: 0,
+      totalRounds: numRounds,
+      defaultNumJokers: numJokers,
       prevRounds: [],
     });
 

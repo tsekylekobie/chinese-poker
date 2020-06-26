@@ -11,6 +11,8 @@ const gameSchema = new Schema(
     names: [String],
     gameStatus: Number,
     round: Number,
+    totalRounds: Number,
+    defaultNumJokers: Number,
     prevRounds: [Round.schema],
     players: [Player.schema],
   },

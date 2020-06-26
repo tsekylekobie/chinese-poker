@@ -35,12 +35,14 @@ export function getGame(gameId, callback) {
     });
 }
 
-export function createGame(name, callback) {
+export function createGame(name, numRounds, numJokers, callback) {
   const gameId = generate();
   axios
     .post("/api/create-game", {
       gameId,
       creator: [name.toLowerCase()],
+      numRounds,
+      numJokers,
     })
     .then((res) => {
       if (res.status === 200) {

@@ -110,7 +110,7 @@ function BottomNav() {
           color="primary"
           onClick={startGameHandler}
         >
-          Start
+          I'm ready
         </Button>
       );
       break;
@@ -228,7 +228,7 @@ function BottomNav() {
         <Grid container item xs={4} direction="column" alignItems="center">
           <Table rows={rows} data={metadata} />
           <Grid className={classes.control} item xs={12}>
-            {metadata.round < 1 ? (
+            {metadata.round < metadata.totalRounds ? (
               <Button
                 variant="contained"
                 className={classes.button}

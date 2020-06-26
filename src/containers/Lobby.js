@@ -17,6 +17,7 @@ import { createGame, joinGame } from "../actions/index";
 
 // Error messages
 const NAME_ERR = "Please enter a name";
+const SETTINGS_ERR = "Please enter valid game settings";
 const GAMEID_ERR = "Invalid GameID";
 
 const useStyles = makeStyles((theme) => ({
@@ -65,7 +66,10 @@ function Lobby(props) {
     setError("");
   };
 
+  // Game settings
   const [gameId, setGameId] = useState("");
+  const [numRounds, setNumRounds] = useState(10);
+  const [numJokers, setNumJokers] = useState(3);
 
   function onSuccess(data) {
     if (data.error) {
@@ -80,10 +84,12 @@ function Lobby(props) {
   }
 
   function createRoom() {
-    if (!name) {
+    if (!numJokers || !numRounds || numJokers < 0 || numRounds <= 0) {
+      setError(SETTINGS_ERR);
+    } else if (!name) {
       setError(NAME_ERR);
     } else {
-      createGame(name, onSuccess);
+      createGame(name, numRounds, numJokers, onSuccess);
     }
   }
 
@@ -106,7 +112,7 @@ function Lobby(props) {
               vertical: "bottom",
               horizontal: "left",
             }}
-            open={error.length > 0}
+            open={true}
             autoHideDuration={5000}
             onClose={handleClose}
           >
@@ -140,6 +146,28 @@ function Lobby(props) {
                 size="small"
                 defaultValue={name}
                 onBlur={(e) => setName(e.target.value)}
+              />
+              <TextField
+                label="Number of rounds"
+                className={classes.input}
+                variant="outlined"
+                size="small"
+                type="number"
+                defaultValue={numRounds}
+                error={numRounds <= 0}
+                helperText={numRounds <= 0 ? "Invalid number" : ""}
+                onBlur={(e) => setNumRounds(e.target.value)}
+              />
+              <TextField
+                label="Number of jokers"
+                className={classes.input}
+                variant="outlined"
+                size="small"
+                type="number"
+                defaultValue={numJokers}
+                error={numJokers < 0}
+                helperText={numJokers < 0 ? "Invalid number" : ""}
+                onBlur={(e) => setNumJokers(e.target.value)}
               />
               <Button
                 variant="contained"
