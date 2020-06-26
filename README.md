@@ -1,2 +1,3 @@
 # chinese-poker
-Kyndall's version of Chinese Poker
+
+13 Cards – Kyndall's spin on Chinese poker

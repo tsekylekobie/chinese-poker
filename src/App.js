@@ -11,6 +11,7 @@ import { AppBar, Toolbar, Typography, Button } from "@material-ui/core";
 
 import Lobby from "./containers/Lobby";
 import Game from "./containers/Game";
+import Rules from "./containers/Rules";
 import "./App.css";
 
 const socket = io();
@@ -72,15 +73,18 @@ function App() {
           <Toolbar>
             <Typography variant="h6" className={classes.title}>
               <span className={classes.titleText} onClick={goHome}>
-                Chinese Poker
+                13 Cards
               </span>
             </Typography>
-            <Button color="inherit">Rules</Button>
+            <Button color="inherit" onClick={() => history.push("/rules")}>
+              Rules
+            </Button>
           </Toolbar>
         </AppBar>
         <AppContext.Provider value={{ socket, name, setName, goHome }}>
           <Switch>
             <Route path="/game/:roomID" component={Game} />
+            <Route path="/rules" component={Rules} />
             <Route path="/" component={Lobby} />
           </Switch>
         </AppContext.Provider>
