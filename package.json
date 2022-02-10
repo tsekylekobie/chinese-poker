@@ -13,7 +13,7 @@
     "card-deck": "^1.0.1",
     "clsx": "^1.1.1",
     "concurrently": "^5.2.0",
-    "engine.io": "^3.4.1",
+    "engine.io": "^4.1.2",
     "express": "^4.17.1",
     "lodash": "^4.17.15",
     "mongoose": "^5.9.20",
